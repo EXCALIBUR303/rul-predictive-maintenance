@@ -61,6 +61,7 @@ def build_xgb_window_features(
     window_length: int,
     target_column: str | None = "RUL",
     last_only: bool = False,
+    include_regime_id: bool = False,
 ) -> tuple[np.ndarray, np.ndarray | None, list[str], pd.DataFrame]:
     seq = build_sequence_windows(
         frame=frame,
@@ -69,12 +70,21 @@ def build_xgb_window_features(
         target_column=target_column,
         last_only=last_only,
     )
-    names = _xgb_feature_names(feature_columns)
+    if include_regime_id and "regime_id" not in frame.columns:
+        raise ValueError("include_regime_id=True requires a regime_id column.")
+    names = _xgb_feature_names(feature_columns, include_regime_id=include_regime_id)
     rows = []
     for idx in range(seq.x.shape[0]):
         valid = seq.x[idx][seq.mask[idx]]
         rows.append(_window_stats(valid))
     matrix = np.asarray(rows, dtype=np.float32)
+    if include_regime_id:
+        end_index = pd.MultiIndex.from_arrays([seq.unit_numbers, seq.end_cycles])
+        regime_indexed = frame.set_index(["unit_number", "time_in_cycles"])["regime_id"]
+        regimes = regime_indexed.reindex(end_index).to_numpy(dtype=np.float32)
+        if np.isnan(regimes).any():
+            raise ValueError("A generated XGBoost window does not have a final-cycle regime_id.")
+        matrix = np.column_stack((matrix, regimes))
     meta = pd.DataFrame({"unit_number": seq.unit_numbers, "time_in_cycles": seq.end_cycles})
     return matrix, seq.y, names, meta
 
@@ -109,7 +119,9 @@ def _window_stats(window: np.ndarray) -> np.ndarray:
     return np.concatenate(stats, axis=0)
 
 
-def _xgb_feature_names(feature_columns: list[str]) -> list[str]:
+def _xgb_feature_names(feature_columns: list[str], include_regime_id: bool = False) -> list[str]:
     stats = ["mean", "std", "min", "max", "last", "slope", "delta"]
-    return [f"{column}__{stat}" for stat in stats for column in feature_columns]
-
+    names = [f"{column}__{stat}" for stat in stats for column in feature_columns]
+    if include_regime_id:
+        names.append("regime_id")
+    return names

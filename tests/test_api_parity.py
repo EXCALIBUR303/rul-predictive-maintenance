@@ -42,3 +42,35 @@ def test_api_uses_the_same_xgboost_preprocessing_and_window_features(tmp_path, m
     assert response.status_code == 200
     actual = np.array([item["predicted_rul"] for item in response.json()["predictions"]])
     np.testing.assert_allclose(actual, expected, rtol=0, atol=0)
+
+
+def test_api_preserves_fd004_regime_feature_parity(tmp_path, monkeypatch, synthetic_cmapss_frame):
+    raw = synthetic_cmapss_frame(n_units=4, cycles=8)
+    for unit in raw["unit_number"].unique():
+        raw.loc[raw["unit_number"] == unit, "op_setting_1"] = float(unit % 2) * 10.0
+    labeled = add_train_rul(raw, rul_cap=10)
+    preprocessor = CmapssPreprocessor(n_regimes=2, low_unique_threshold=2, random_state=3).fit(labeled)
+    processed = preprocessor.transform(labeled)
+    x, y, names, _ = build_xgb_window_features(
+        processed, preprocessor.feature_columns, window_length=4, include_regime_id=True
+    )
+    model = XGBoostRulModel({"n_estimators": 4, "max_depth": 2, "n_jobs": 1}, rul_cap=10, seed=3).fit(x, y)
+
+    save_config({"data": {"rul_cap": 10, "window_length": 4, "n_regimes": 2}}, tmp_path / "config.yaml")
+    (tmp_path / "metadata.json").write_text(json.dumps({"model": "xgboost"}), encoding="utf-8")
+    (tmp_path / "xgb_feature_names.json").write_text(json.dumps(names), encoding="utf-8")
+    preprocessor.save(tmp_path / "preprocessor.joblib")
+    model.save(tmp_path / "model.joblib")
+
+    request_frame = raw[raw["unit_number"] == 1].copy()
+    offline = preprocessor.transform(request_frame)
+    offline_x, _, _, _ = build_xgb_window_features(
+        offline, preprocessor.feature_columns, window_length=4, target_column=None, last_only=True, include_regime_id=True
+    )
+    expected = model.predict(offline_x)
+
+    monkeypatch.setenv("RULPM_ARTIFACT_DIR", str(tmp_path))
+    response = TestClient(create_app()).post("/predict", json={"rows": request_frame.to_dict(orient="records")})
+    assert response.status_code == 200
+    actual = np.array([item["predicted_rul"] for item in response.json()["predictions"]])
+    np.testing.assert_allclose(actual, expected, rtol=0, atol=0)

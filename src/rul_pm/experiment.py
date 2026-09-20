@@ -78,12 +78,23 @@ def train_one_model(config: dict[str, Any], model_name: str, seed: int | None = 
     }
     (run_root / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     window_length = int(config["data"].get("window_length", 30))
+    include_regime_id = int(config["data"].get("n_regimes", 1)) > 1
     if model_name == "xgboost":
         train_x, train_y, feature_names, _ = build_xgb_window_features(
-            splits["train"], preprocessor.feature_columns, window_length, target_column="RUL", last_only=False
+            splits["train"],
+            preprocessor.feature_columns,
+            window_length,
+            target_column="RUL",
+            last_only=False,
+            include_regime_id=include_regime_id,
         )
         val_x, val_y, _, _ = build_xgb_window_features(
-            splits["val"], preprocessor.feature_columns, window_length, target_column="RUL", last_only=False
+            splits["val"],
+            preprocessor.feature_columns,
+            window_length,
+            target_column="RUL",
+            last_only=False,
+            include_regime_id=include_regime_id,
         )
         (run_root / "xgb_feature_names.json").write_text(json.dumps(feature_names, indent=2), encoding="utf-8")
         train_xgboost(train_x, train_y, val_x, val_y, config, run_root, seed)
@@ -119,7 +130,12 @@ def evaluate_run(run_dir: str | Path) -> dict[str, Any]:
         from rul_pm.models.xgb_model import XGBoostRulModel
 
         x_test, _, _, meta = build_xgb_window_features(
-            test_processed, preprocessor.feature_columns, window_length, target_column=None, last_only=True
+            test_processed,
+            preprocessor.feature_columns,
+            window_length,
+            target_column=None,
+            last_only=True,
+            include_regime_id=int(config["data"].get("n_regimes", 1)) > 1,
         )
         model = XGBoostRulModel.load(run_path / "model.joblib")
         pred = model.predict(x_test)

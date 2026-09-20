@@ -4,8 +4,9 @@ import json
 from pathlib import Path
 
 import pandas as pd
+from sklearn.cluster import KMeans
 
-from rul_pm.data.io import SENSOR_COLUMNS, load_subset
+from rul_pm.data.io import SENSOR_COLUMNS, SETTING_COLUMNS, load_subset
 
 
 EXPECTED_COUNTS = {
@@ -25,6 +26,7 @@ def run_eda(config: dict) -> dict:
     test_lengths = loaded.test.groupby("unit_number")["time_in_cycles"].max()
     sensor_variance = loaded.train[SENSOR_COLUMNS].var(ddof=0).sort_values()
     constant_sensors = sensor_variance[sensor_variance <= float(config["data"].get("low_variance_threshold", 1.0e-8))].index.tolist()
+    regime_reference = _regime_reference(loaded.train, int(config["data"].get("n_regimes", 1)))
     summary = {
         "subset": subset,
         "train_units": int(loaded.train["unit_number"].nunique()),
@@ -34,6 +36,7 @@ def run_eda(config: dict) -> dict:
         "train_length": _series_stats(train_lengths),
         "test_length": _series_stats(test_lengths),
         "constant_sensor_reference": constant_sensors,
+        "operating_regime_reference": regime_reference,
         "expected_counts": EXPECTED_COUNTS.get(subset),
     }
     if subset in EXPECTED_COUNTS:
@@ -52,3 +55,16 @@ def _series_stats(series: pd.Series) -> dict[str, float]:
         "max": float(series.max()),
     }
 
+
+def _regime_reference(frame: pd.DataFrame, n_regimes: int) -> dict:
+    if n_regimes <= 1:
+        return {"expected_count": 1, "observed_count": 1, "row_counts": {"0": int(len(frame))}}
+    model = KMeans(n_clusters=n_regimes, random_state=42, n_init=20)
+    labels = model.fit_predict(frame[SETTING_COLUMNS])
+    counts = pd.Series(labels).value_counts().sort_index()
+    return {
+        "expected_count": n_regimes,
+        "observed_count": int(len(counts)),
+        "row_counts": {str(int(label)): int(count) for label, count in counts.items()},
+        "centers": model.cluster_centers_.round(6).tolist(),
+    }

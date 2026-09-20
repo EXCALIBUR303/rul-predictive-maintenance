@@ -40,6 +40,21 @@ def test_persisted_preprocessor_reproduces_transform(tmp_path, synthetic_cmapss_
     )
 
 
+def test_condition_wise_preprocessing_is_fit_only_on_training_rows(synthetic_cmapss_frame):
+    train = add_train_rul(synthetic_cmapss_frame(n_units=6, cycles=12), rul_cap=10)
+    for unit in train["unit_number"].unique():
+        train.loc[train["unit_number"] == unit, "op_setting_1"] = float(unit % 2) * 10.0
+    preprocessor = CmapssPreprocessor(n_regimes=2, low_unique_threshold=1, random_state=7).fit(train)
+    scalers_before = {regime: scaler.data_min_.copy() for regime, scaler in preprocessor.scalers_.items()}
+    held_out = train[train["unit_number"] == 1].drop(columns="RUL").copy()
+    held_out["sensor_2"] += 10_000.0
+    transformed = preprocessor.transform(held_out)
+    assert transformed["regime_id"].nunique() == 1
+    assert set(scalers_before) == {0, 1}
+    for regime, data_min in scalers_before.items():
+        np.testing.assert_allclose(data_min, preprocessor.scalers_[regime].data_min_)
+
+
 def test_training_split_does_not_load_official_test_data(tmp_path, monkeypatch, synthetic_cmapss_frame, write_cmapss_table):
     train = synthetic_cmapss_frame(n_units=5, cycles=12)
     write_cmapss_table(tmp_path / "train_FD001.txt", train)
@@ -104,6 +119,24 @@ def test_xgb_short_window_statistics_ignore_left_padding():
     assert targets.tolist() == [0.0]
     expected = {"sensor__mean": 3.0, "sensor__std": 1.0, "sensor__min": 2.0, "sensor__max": 4.0, "sensor__last": 4.0, "sensor__slope": 2.0, "sensor__delta": 2.0}
     assert dict(zip(names, matrix[0], strict=True)) == pytest.approx(expected)
+
+
+def test_xgb_can_include_last_cycle_regime_id():
+    import pandas as pd
+
+    frame = pd.DataFrame(
+        {
+            "unit_number": [1, 1, 1],
+            "time_in_cycles": [1, 2, 3],
+            "sensor": [1.0, 2.0, 3.0],
+            "regime_id": [0, 1, 1],
+        }
+    )
+    matrix, _, names, _ = build_xgb_window_features(
+        frame, ["sensor"], window_length=2, target_column=None, last_only=True, include_regime_id=True
+    )
+    assert names[-1] == "regime_id"
+    assert matrix[0, -1] == 1.0
 
 
 def test_metrics_and_nasa_asymmetry():

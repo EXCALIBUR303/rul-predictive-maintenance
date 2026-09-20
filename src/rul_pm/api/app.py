@@ -39,7 +39,12 @@ def create_app():
             model_name = bundle["metadata"]["model"]
             if model_name == "xgboost":
                 x, _, _, meta = build_xgb_window_features(
-                    processed, bundle["preprocessor"].feature_columns, window_length, target_column=None, last_only=True
+                    processed,
+                    bundle["preprocessor"].feature_columns,
+                    window_length,
+                    target_column=None,
+                    last_only=True,
+                    include_regime_id=int(bundle["config"]["data"].get("n_regimes", 1)) > 1,
                 )
                 pred = bundle["model"].predict(x)
             else:

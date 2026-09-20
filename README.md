@@ -1,6 +1,7 @@
 # Intelligent Predictive Maintenance System
 
-A leakage-safe Remaining Useful Life (RUL) pipeline for NASA C-MAPSS FD001.
+A leakage-safe Remaining Useful Life (RUL) pipeline for NASA C-MAPSS FD001 and
+FD004.
 It compares XGBoost against LSTM, GRU, and a small Transformer under one
 engine-level experimental protocol, with the official test set held out until
 final evaluation.
@@ -18,6 +19,20 @@ These are the actual results from three seeds (`42`, `1337`, and `2026`), not
 tuned showcase values. XGBoost was best on every reported aggregate metric.
 See [the FD001 experiment card](docs/EXPERIMENT_CARD_FD001.md) for the full
 protocol, leakage controls, and limitations.
+
+## Published FD004 Result
+
+| Model | MAE | RMSE | NASA/PHM08 Score |
+| --- | ---: | ---: | ---: |
+| XGBoost | 11.177 +/- 0.086 | 15.924 +/- 0.150 | 1442.499 +/- 166.958 |
+| Transformer | 11.382 +/- 0.822 | 16.387 +/- 1.596 | 1706.756 +/- 679.180 |
+| GRU | 10.787 +/- 0.518 | 16.447 +/- 1.009 | 1909.921 +/- 580.499 |
+| LSTM | 11.331 +/- 0.936 | 17.963 +/- 2.509 | 4575.788 +/- 4984.534 |
+
+These are the actual results from the fixed three-seed protocol. XGBoost has
+the strongest aggregate RMSE and NASA Score; GRU has the lowest aggregate MAE.
+The large LSTM NASA-Score variance is retained because one seed made several
+severe RUL underestimates. See [the FD004 experiment card](docs/EXPERIMENT_CARD_FD004.md).
 
 ## Why This Is Trustworthy
 
@@ -41,6 +56,8 @@ Requires Python 3.11 and [uv](https://docs.astral.sh/uv/).
 make install-all
 make data-fd001
 make eda-fd001
+make data-fd004
+make eda-fd004
 make test
 ```
 
@@ -49,10 +66,16 @@ Simulation archive and extracts only `train_FD001.txt`, `test_FD001.txt`, and
 `RUL_FD001.txt` into `data/raw/CMAPSSData/`. The raw data is intentionally not
 committed. Its provenance is NASA's [C-MAPSS data repository](https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/).
 
+NASA's full C-MAPSS download is currently unavailable. `make data-fd004` uses
+a pinned raw-text mirror whose FD001 files were verified byte-for-byte against
+the NASA archive used above; it verifies SHA-256 for each FD004 file. The
+exact fallback provenance is recorded in the FD004 experiment card.
+
 ## Reproduce The Comparison
 
 ```bash
 make experiment-fd001
+make experiment-fd004
 ```
 
 The comparison retrains 12 model/seed combinations, chooses checkpoints using
@@ -82,14 +105,13 @@ metrics; it does not claim per-prediction uncertainty.
 ## Repository Map
 
 ```text
-configs/       Fixed FD001 experiment configuration
-docs/          Experiment card and methodological boundaries
+configs/       Fixed FD001 and FD004 experiment configurations
+docs/          Experiment cards and methodological boundaries
 scripts/       Dataset acquisition helper
 src/rul_pm/    Ingestion, preprocessing, windows, models, training, API
 tests/         Leakage, boundary, persistence, and API-parity tests
-results/FD001/ Versioned aggregate experimental results
+results/       Versioned aggregate FD001 and FD004 experimental results
 ```
 
 GitHub Actions runs the test suite without downloading the dataset or running
-the expensive full experiment. FD004 is deliberately out of scope until the
-FD001 baseline is independently reproducible and reviewed.
+the expensive full experiment.
