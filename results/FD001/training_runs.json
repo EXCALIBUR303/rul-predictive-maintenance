@@ -1,0 +1,62 @@
+[
+  {
+    "model": "xgboost",
+    "seed": 42,
+    "run_dir": "runs/FD001/xgboost/seed_42"
+  },
+  {
+    "model": "xgboost",
+    "seed": 1337,
+    "run_dir": "runs/FD001/xgboost/seed_1337"
+  },
+  {
+    "model": "xgboost",
+    "seed": 2026,
+    "run_dir": "runs/FD001/xgboost/seed_2026"
+  },
+  {
+    "model": "lstm",
+    "seed": 42,
+    "run_dir": "runs/FD001/lstm/seed_42"
+  },
+  {
+    "model": "lstm",
+    "seed": 1337,
+    "run_dir": "runs/FD001/lstm/seed_1337"
+  },
+  {
+    "model": "lstm",
+    "seed": 2026,
+    "run_dir": "runs/FD001/lstm/seed_2026"
+  },
+  {
+    "model": "gru",
+    "seed": 42,
+    "run_dir": "runs/FD001/gru/seed_42"
+  },
+  {
+    "model": "gru",
+    "seed": 1337,
+    "run_dir": "runs/FD001/gru/seed_1337"
+  },
+  {
+    "model": "gru",
+    "seed": 2026,
+    "run_dir": "runs/FD001/gru/seed_2026"
+  },
+  {
+    "model": "transformer",
+    "seed": 42,
+    "run_dir": "runs/FD001/transformer/seed_42"
+  },
+  {
+    "model": "transformer",
+    "seed": 1337,
+    "run_dir": "runs/FD001/transformer/seed_1337"
+  },
+  {
+    "model": "transformer",
+    "seed": 2026,
+    "run_dir": "runs/FD001/transformer/seed_2026"
+  }
+]

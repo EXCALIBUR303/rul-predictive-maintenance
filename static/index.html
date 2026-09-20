@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RUL Predictive Maintenance</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17202a;
+        --muted: #5d6b7a;
+        --line: #d8dee7;
+        --accent: #0f766e;
+        --surface: #f7f9fb;
+        --warn: #b42318;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: #ffffff;
+      }
+      header {
+        border-bottom: 1px solid var(--line);
+        padding: 18px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px;
+        display: grid;
+        gap: 24px;
+      }
+      h1, h2 { margin: 0; letter-spacing: 0; }
+      h1 { font-size: 22px; }
+      h2 { font-size: 17px; }
+      .muted { color: var(--muted); font-size: 14px; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+        background: var(--surface);
+      }
+      .metric {
+        font-size: 26px;
+        font-weight: 720;
+        margin-top: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      th, td {
+        text-align: left;
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      th { background: var(--surface); color: var(--muted); font-weight: 650; }
+      tr:last-child td { border-bottom: 0; }
+      button {
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        background: var(--accent);
+        color: white;
+        padding: 9px 12px;
+        font-weight: 650;
+        cursor: pointer;
+      }
+      textarea {
+        width: 100%;
+        min-height: 180px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        font: 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      @media (max-width: 800px) {
+        header { align-items: flex-start; flex-direction: column; }
+        .grid { grid-template-columns: 1fr 1fr; }
+      }
+      @media (max-width: 520px) {
+        .grid { grid-template-columns: 1fr; }
+        main { padding: 18px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>RUL Predictive Maintenance</h1>
+        <div class="muted">C-MAPSS inference surface for persisted experiment artifacts</div>
+      </div>
+      <button id="healthButton">Check API</button>
+    </header>
+    <main>
+      <section class="grid">
+        <div class="card">
+          <div class="muted">Model</div>
+          <div class="metric" id="modelMetric">-</div>
+        </div>
+        <div class="card">
+          <div class="muted">Predicted RUL</div>
+          <div class="metric" id="rulMetric">-</div>
+        </div>
+        <div class="card">
+          <div class="muted">Reference MAE</div>
+          <div class="metric" id="maeMetric">-</div>
+        </div>
+        <div class="card">
+          <div class="muted">Reference RMSE</div>
+          <div class="metric" id="rmseMetric">-</div>
+        </div>
+      </section>
+      <section>
+        <h2>Prediction Request</h2>
+        <p class="muted">Paste recent cycles for one engine as JSON rows using C-MAPSS column names.</p>
+        <textarea id="payload">[
+  {
+    "unit_number": 1,
+    "time_in_cycles": 1,
+    "op_setting_1": 0,
+    "op_setting_2": 0,
+    "op_setting_3": 100,
+    "sensor_1": 518.67,
+    "sensor_2": 641.82,
+    "sensor_3": 1589.7,
+    "sensor_4": 1400.6,
+    "sensor_5": 14.62,
+    "sensor_6": 21.61,
+    "sensor_7": 554.36,
+    "sensor_8": 2388.06,
+    "sensor_9": 9046.19,
+    "sensor_10": 1.3,
+    "sensor_11": 47.47,
+    "sensor_12": 521.66,
+    "sensor_13": 2388.02,
+    "sensor_14": 8138.62,
+    "sensor_15": 8.4195,
+    "sensor_16": 0.03,
+    "sensor_17": 392,
+    "sensor_18": 2388,
+    "sensor_19": 100,
+    "sensor_20": 39.06,
+    "sensor_21": 23.419
+  }
+]</textarea>
+        <p><button id="predictButton">Predict</button></p>
+      </section>
+      <section>
+        <h2>Latest Predictions</h2>
+        <table>
+          <thead><tr><th>Unit</th><th>Cycle</th><th>Predicted RUL</th></tr></thead>
+          <tbody id="predictionRows"><tr><td colspan="3" class="muted">No prediction yet.</td></tr></tbody>
+        </table>
+      </section>
+    </main>
+    <script>
+      const healthButton = document.getElementById("healthButton");
+      const predictButton = document.getElementById("predictButton");
+      const predictionRows = document.getElementById("predictionRows");
+      healthButton.addEventListener("click", async () => {
+        const response = await fetch("/health");
+        const data = await response.json();
+        healthButton.textContent = data.ok ? "API Ready" : "API Offline";
+      });
+      predictButton.addEventListener("click", async () => {
+        const rows = JSON.parse(document.getElementById("payload").value);
+        const response = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rows })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Prediction failed");
+        document.getElementById("modelMetric").textContent = data.model;
+        const first = data.predictions[0];
+        document.getElementById("rulMetric").textContent = first.predicted_rul.toFixed(1);
+        const metrics = data.typical_error_reference?.test_metrics || data.typical_error_reference || {};
+        document.getElementById("maeMetric").textContent = metrics.mae?.toFixed ? metrics.mae.toFixed(1) : "-";
+        document.getElementById("rmseMetric").textContent = metrics.rmse?.toFixed ? metrics.rmse.toFixed(1) : "-";
+        predictionRows.innerHTML = data.predictions.map((row) =>
+          `<tr><td>${row.unit_number}</td><td>${row.time_in_cycles}</td><td>${row.predicted_rul.toFixed(2)}</td></tr>`
+        ).join("");
+      });
+    </script>
+  </body>
+</html>
+

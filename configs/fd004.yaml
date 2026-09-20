@@ -1,0 +1,45 @@
+experiment:
+  subset: FD004
+  data_dir: data/raw/CMAPSSData
+  output_dir: runs
+  seeds: [42, 1337, 2026]
+
+data:
+  rul_cap: 125
+  window_length: 30
+  validation_fraction: 0.2
+  scaler: minmax
+  low_variance_threshold: 1.0e-8
+  low_unique_threshold: 2
+  n_regimes: 6
+
+training:
+  batch_size: 128
+  max_epochs: 100
+  patience: 12
+  learning_rate: 1.0e-3
+  weight_decay: 1.0e-4
+  gradient_clip_norm: 1.0
+  loss: huber
+  num_workers: 0
+
+xgboost:
+  n_estimators: 1000
+  max_depth: 6
+  learning_rate: 0.03
+  subsample: 0.8
+  colsample_bytree: 0.8
+  min_child_weight: 3
+  reg_lambda: 1.0
+  tree_method: hist
+  objective: reg:squarederror
+  early_stopping_rounds: 50
+  n_jobs: 1
+
+neural:
+  hidden_size: 64
+  num_layers: 2
+  dropout: 0.2
+  d_model: 64
+  nhead: 4
+  dim_feedforward: 128
