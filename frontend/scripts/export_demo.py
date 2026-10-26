@@ -10,6 +10,7 @@ from rul_pm.data.io import read_cmapss_table, COLUMNS
 
 ROOT = Path(__file__).resolve().parents[2]
 p = argparse.ArgumentParser(description=__doc__)
+p.add_argument('--engines',type=int,default=12,choices=range(1,13),help='Number of preview engines (1–12)')
 p.add_argument('--bundle', action='append', default=[], help='MODEL=RUN_DIR; must match metadata.json')
 p.add_argument('--subset', default='FD004', choices=['FD001','FD004'])
 p.add_argument('--output', type=Path, default=ROOT/'frontend/public/demo.json')
@@ -25,6 +26,7 @@ for spec in a.bundle:
 path=ROOT/'data/raw/CMAPSSData'/f'train_{a.subset}.txt'
 frame=read_cmapss_table(path) if path.exists() else None
 if bundles and frame is None: p.error('Real data is required to export trained predictions')
+if bundles and 'xgboost' not in bundles: p.error('Include an XGBoost bundle for the fleet risk view; other model bundles are optional')
 clients={}
 if bundles:
  import os
@@ -35,7 +37,7 @@ if bundles:
   clients[name]=TestClient(create_app())
 sensors=[2,3,4,7,9,11,12,14,15,20,21]
 engines=[]
-for i in range(1,13):
+for i in range(1,a.engines+1):
  if frame is not None:
   f=frame[frame.unit_number==i]; raw=f.to_dict(orient='records')
  else:
