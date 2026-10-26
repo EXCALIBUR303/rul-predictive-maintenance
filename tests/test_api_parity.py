@@ -18,7 +18,8 @@ from rul_pm.data.windows import build_xgb_window_features
 from rul_pm.models.xgb_model import XGBoostRulModel
 
 
-def test_api_uses_the_same_xgboost_preprocessing_and_window_features(tmp_path, monkeypatch, synthetic_cmapss_frame):
+@pytest.mark.parametrize("integer_measurements", [False, True])
+def test_api_uses_the_same_xgboost_preprocessing_and_window_features(tmp_path, monkeypatch, synthetic_cmapss_frame, integer_measurements):
     raw = synthetic_cmapss_frame(n_units=4, cycles=8)
     labeled = add_train_rul(raw, rul_cap=10)
     preprocessor = CmapssPreprocessor(n_regimes=1, low_unique_threshold=2).fit(labeled)
@@ -33,7 +34,14 @@ def test_api_uses_the_same_xgboost_preprocessing_and_window_features(tmp_path, m
     model.save(tmp_path / "model.joblib")
 
     request_frame = raw[raw["unit_number"] == 1].copy()
-    offline = preprocessor.transform(request_frame)
+    if integer_measurements:
+        measurement_columns = [name for name in request_frame if name.startswith(("sensor_", "op_setting_"))]
+        request_frame[measurement_columns] = request_frame[measurement_columns].round().astype(int)
+    offline_frame = request_frame.copy()
+    for column in offline_frame.columns:
+        if column.startswith(("sensor_", "op_setting_")):
+            offline_frame[column] = offline_frame[column].astype(float)
+    offline = preprocessor.transform(offline_frame)
     offline_x, _, _, _ = build_xgb_window_features(offline, preprocessor.feature_columns, window_length=4, target_column=None, last_only=True)
     expected = model.predict(offline_x)
 

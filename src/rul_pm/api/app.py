@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from rul_pm.config import load_config
+from rul_pm.data.io import SENSOR_COLUMNS, SETTING_COLUMNS
 from rul_pm.data.preprocess import CmapssPreprocessor
 from rul_pm.data.windows import build_sequence_windows, build_xgb_window_features
 from rul_pm.evaluation.metrics import clip_predictions
@@ -34,6 +35,9 @@ def create_app():
         try:
             bundle = _load_bundle(artifact_dir)
             frame = pd.DataFrame(request.rows)
+            # JSON whole-valued measurements must remain float-compatible for scaling.
+            measurements = [name for name in (*SETTING_COLUMNS, *SENSOR_COLUMNS) if name in frame]
+            frame[measurements] = frame[measurements].astype(float)
             processed = bundle["preprocessor"].transform(frame)
             window_length = int(bundle["config"]["data"].get("window_length", 30))
             model_name = bundle["metadata"]["model"]

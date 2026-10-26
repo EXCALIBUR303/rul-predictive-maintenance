@@ -10,5 +10,9 @@
 | Replay thresholds 30/60 cycles are illustrative | Imply operational maintenance limits | No calibrated maintenance policy exists | Change shared status helper and labels |
 | CPU-sized preview, no full retraining | Run 12 costly experiments | UI task; no request to retrain; weights missing | Run existing documented training separately and export |
 | Scoped CSS, native font stack, inline vector engine graphic | Remote fonts/images or 3D model | Offline portfolio portability, no tracking or asset licensing ambiguity | Replace module tokens/assets |
+| Webpack production build | Turbopack default | Turbopack CSS worker encountered socket restrictions in this environment; webpack builds successfully | Change package build script to next build after validating worker permissions |
+| Tailwind local @reference/@apply only | Global preflight/utilities | Avoid CSS leakage when embedded; module owns its styles | Introduce scoped utilities after checking host pages |
+
+API-only exception: `src/rul_pm/api/app.py` normalizes present sensor/operating-setting columns to float before preprocessing. A real UI POST with whole-valued JSON measurements failed under pandas 3 with an integer-column assignment error. Alternatives: change preprocessing/training, or distort payload values with artificial decimals (rejected). This boundary normalization preserves legitimate values and all response shapes; reverse by removing the conversion after a future preprocessor supports integer frames. The existing API parity test now covers both integer and floating measurement payloads.
 
 No model/training code or API response shapes changed. Research access limits and measured QA results are documented separately.
