@@ -1,0 +1,10 @@
+{
+  "model": "gru",
+  "seed": 42,
+  "best_epoch": 3,
+  "best_val_rmse": 18.544213208717025,
+  "parameter_count": 5889,
+  "train_time_seconds": 5.9800615310668945,
+  "artifact": "artifacts/portfolio/FD004/gru/seed_42/best.pt",
+  "last_artifact": "artifacts/portfolio/FD004/gru/seed_42/last.pt"
+}

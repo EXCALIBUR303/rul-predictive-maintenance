@@ -1,0 +1,10 @@
+{
+  "model": "lstm",
+  "seed": 42,
+  "best_epoch": 3,
+  "best_val_rmse": 41.6823966554532,
+  "parameter_count": 7489,
+  "train_time_seconds": 1.5514438152313232,
+  "artifact": "artifacts/portfolio/FD003/lstm/seed_42/best.pt",
+  "last_artifact": "artifacts/portfolio/FD003/lstm/seed_42/last.pt"
+}

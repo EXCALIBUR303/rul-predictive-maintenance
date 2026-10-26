@@ -1,0 +1,11 @@
+{
+  "subset": "FD004",
+  "model": "xgboost",
+  "seed": 42,
+  "test_metrics": {
+    "mae": 11.676785909360454,
+    "rmse": 16.569442594656522,
+    "nasa_score": 1877.2017542035583
+  },
+  "n_test_engines": 248
+}

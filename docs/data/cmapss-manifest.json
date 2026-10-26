@@ -1,0 +1,67 @@
+{
+  "repository": "https://github.com/PunVas/nasa-c-mapss",
+  "commit": "2b562334f2114d9dadfc0861dededc16cf2550d9",
+  "verification": "Raw HTTPS bytes matched pinned Git tree blob identities; SHA-256 frozen for subsequent downloads. Not an independent NASA signature.",
+  "files": {
+    "train_FD001.txt": {
+      "sha256": "963b5e22825b34d8b21c69e1aeb4af3e647050eb672ee8834ba4b5d91d2de0f8",
+      "git_blob_sha1": "d2809918c8b75fa3319714658ae994deb2017a89",
+      "bytes": 3515356
+    },
+    "test_FD001.txt": {
+      "sha256": "3cda7109ce17bafb5443f2ac926cfcf88154b941b8c4cf95eb55d1ddd6f52851",
+      "git_blob_sha1": "7844fbf8d6ad32176f92544ad4f4c456481d930d",
+      "bytes": 2228855
+    },
+    "RUL_FD001.txt": {
+      "sha256": "a19c8ec94931949d0485bdc35118206e9c81c4547b422efb9cf86f4ceddbceca",
+      "git_blob_sha1": "e8dd7cfeee96d2dfd55166f5758227d36c096dd3",
+      "bytes": 429
+    },
+    "train_FD002.txt": {
+      "sha256": "dac6c4dbc4e7c1bdeb5747da3d313d05c395bb99801b44a002b26a2ba13d788f",
+      "git_blob_sha1": "694e39f99609f098025ef444d6fe89828ca74cbc",
+      "bytes": 9082480
+    },
+    "test_FD002.txt": {
+      "sha256": "de7b5bf7e998a985c378488480528b7c02cff1406a46740def362dda8d9b4e02",
+      "git_blob_sha1": "9799aaeb4b4960f28089e8e46cb1565dd1680f55",
+      "bytes": 5734587
+    },
+    "RUL_FD002.txt": {
+      "sha256": "c851dd96a6ea6998d3c4a8f834d3c8013aa90e93a6ed950dc826ad0655b2906b",
+      "git_blob_sha1": "f0c8ec24dbdc9d981ddec636a7a96d74344a0d2c",
+      "bytes": 1110
+    },
+    "train_FD003.txt": {
+      "sha256": "2abbe9968cc5e8eb091980f51b20f62bb4127336d3482cb52071d53bf23329e2",
+      "git_blob_sha1": "0f2ef76638aee1e182850e5c4a79b142bbebb7b5",
+      "bytes": 4213862
+    },
+    "test_FD003.txt": {
+      "sha256": "299babd63c8d987cef079c4a425429f33b3a34797d803bbe2ad48c29dbd0d790",
+      "git_blob_sha1": "ed4f6f67a44f9962f2f95c6cbfab08f07617bd78",
+      "bytes": 2826651
+    },
+    "RUL_FD003.txt": {
+      "sha256": "df1e0566306b174a2de41c67a3e7a51877889598b78643fc3e5685259091b7cb",
+      "git_blob_sha1": "221785454fae67554713aa3ee66bb26ba56ef4e1",
+      "bytes": 428
+    },
+    "train_FD004.txt": {
+      "sha256": "27ef6160b6a1dcb2613a88de9c239f763b223f02cdc41dc5cdedc5dc189b6218",
+      "git_blob_sha1": "a7ab3c7897db150cb061099bce7b426500c90ab8",
+      "bytes": 10350705
+    },
+    "test_FD004.txt": {
+      "sha256": "1dc675fff0624bac10786927c6715b37d1297657137400d2b1a3138d777a3ba5",
+      "git_blob_sha1": "228c6ee54591218b3f4e7981d6ff7d77ff3506be",
+      "bytes": 6957759
+    },
+    "RUL_FD004.txt": {
+      "sha256": "196b836b85a95ac7fdbbf29c5fdf1657382eafa445644d114ffaaf50dc2975e1",
+      "git_blob_sha1": "263ab77cfc0ae3a63b20715bd1488b437f9b0f43",
+      "bytes": 1084
+    }
+  }
+}

@@ -1,0 +1,438 @@
+{
+  "seed": 42,
+  "protocol": "reduced-budget single seed; not the published three-seed benchmark",
+  "runs": [
+    {
+      "subset": "FD001",
+      "model": "xgboost",
+      "run_dir": "artifacts/portfolio/FD001/xgboost/seed_42",
+      "sha256": {
+        "config.yaml": "d5101abe4262aae4150afa8120cbdc7db5c60731edfce097ae9f239d75d523c9",
+        "metadata.json": "154a8e8df893efe47e504f36b488a71f2fbfdcf0a044edac047dbae5742b2572",
+        "preprocessor.joblib": "385ee5b3e61df51a80bb703fb849a4f3e0ec583494c37971d12ad7562b39aad4",
+        "training_summary.json": "76d4a0b65e90c0c41a86d08c3327e511a6ddcb9dbc01ee7781915962605571df",
+        "feature_list.json": "a71f717a9580c19503042c865bde2fc96cf10e560fa7b738b0f09eaa0644035f",
+        "test_metrics.json": "1a8a400cea339ff2f7a0ab80767b5876223d31ea03ac23cb068dd25dc4b21882",
+        "test_predictions.csv": "d56a279f23d8ea95d7cbc3871444851e7dda372acc5d90007569ce58caa76c55",
+        "model.joblib": "7202ff0c7c6953923295aac6415bf20c50fa9031f8ccae330343d7e2f4a13b1d",
+        "xgb_feature_names.json": "ebee5ade7fcb90136884bd828bd979c4d0a290ee31fa68802aa4cb6912a8f9b9"
+      },
+      "evaluation": {
+        "subset": "FD001",
+        "model": "xgboost",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 9.497178316116333,
+          "rmse": 12.782417945499922,
+          "nasa_score": 264.5190144732894
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD001",
+      "model": "lstm",
+      "run_dir": "artifacts/portfolio/FD001/lstm/seed_42",
+      "sha256": {
+        "config.yaml": "d5101abe4262aae4150afa8120cbdc7db5c60731edfce097ae9f239d75d523c9",
+        "metadata.json": "4473fdf4e53abd3795dea6ac84f660a6c72889e703fc4cce8711ac4686f957fa",
+        "preprocessor.joblib": "385ee5b3e61df51a80bb703fb849a4f3e0ec583494c37971d12ad7562b39aad4",
+        "training_summary.json": "1d5ceb78e6a0a477d8925721fc9310dd33907b4ba5148227f9c500941d38579f",
+        "feature_list.json": "a71f717a9580c19503042c865bde2fc96cf10e560fa7b738b0f09eaa0644035f",
+        "test_metrics.json": "1cd7409d49ce79dd89c2f9f3f8c1e9ef0fa1dee0afd5e49360e155f7c7def0ac",
+        "test_predictions.csv": "dc5a57522cf000a8c4162d7bc6f933f00f1ae4d6c1c71d5ef57cb23f79185504",
+        "best.pt": "999e665e2dec74e7c55913086cfada0ef06cdd933b366d2f3d8593a688a104e8",
+        "training_log.csv": "66d5c3b00e08507e2e40d13cb530abc5a5bbbb1435ea4e86600e3754c81debc9"
+      },
+      "evaluation": {
+        "subset": "FD001",
+        "model": "lstm",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 35.072309799194336,
+          "rmse": 40.56853428716081,
+          "nasa_score": 18596.590218137244
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD001",
+      "model": "gru",
+      "run_dir": "artifacts/portfolio/FD001/gru/seed_42",
+      "sha256": {
+        "config.yaml": "d5101abe4262aae4150afa8120cbdc7db5c60731edfce097ae9f239d75d523c9",
+        "metadata.json": "2be77fa282b5f332954fdc83519821ba857d14348ae5afe6b9727677b43a3341",
+        "preprocessor.joblib": "385ee5b3e61df51a80bb703fb849a4f3e0ec583494c37971d12ad7562b39aad4",
+        "training_summary.json": "9a5ac8d2eb094ba1cfd57f75cd25dede0ef6c6318880d21a55d5ef6c81c6fe27",
+        "feature_list.json": "a71f717a9580c19503042c865bde2fc96cf10e560fa7b738b0f09eaa0644035f",
+        "test_metrics.json": "07fe8930627478d7c94ee0b9f5cfbbf8131d8eae7c208e8e77a06b1963b0c61b",
+        "test_predictions.csv": "92fb2ef2f1f21c79c86bfb3714945f4badb7b7df209443bfc7f7b43ec951b973",
+        "best.pt": "aeefa3bc2ae39304a1da4c7b011a508fa4ccadbbfd068716e8978b2428af74f1",
+        "training_log.csv": "7c3e8279bb1eecf189d35c2d86b81446b9394046a97b49441b9bc6f7849ecafb"
+      },
+      "evaluation": {
+        "subset": "FD001",
+        "model": "gru",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 34.46153129577637,
+          "rmse": 40.49939111276144,
+          "nasa_score": 21381.11494335436
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD001",
+      "model": "transformer",
+      "run_dir": "artifacts/portfolio/FD001/transformer/seed_42",
+      "sha256": {
+        "config.yaml": "d5101abe4262aae4150afa8120cbdc7db5c60731edfce097ae9f239d75d523c9",
+        "metadata.json": "a510ed46e3121ead9b01ae9bb96d63a9429776ac791ae18a09cfab2260ef33d1",
+        "preprocessor.joblib": "385ee5b3e61df51a80bb703fb849a4f3e0ec583494c37971d12ad7562b39aad4",
+        "training_summary.json": "0c7d6d92ebee7035709193a9750d36005f566755d8287398c1833cde6f2a258c",
+        "feature_list.json": "a71f717a9580c19503042c865bde2fc96cf10e560fa7b738b0f09eaa0644035f",
+        "test_metrics.json": "65b0f951c11cd5f5c5905db16a11af2e383a0694c7e69fd03761527479a7aa8c",
+        "test_predictions.csv": "a6e0c2673fce5cf1949b27837313b6b5e83bdee3c126ed7b844b26808d113147",
+        "best.pt": "e820df2b4b0e9e4da4bd331611f99ea8f47099a9da14b0c7899bed312cf4257b",
+        "training_log.csv": "d80d3bcfa115bfc43c0f48433e77bd563410a1f07895896a53b091ba23cb8d04"
+      },
+      "evaluation": {
+        "subset": "FD001",
+        "model": "transformer",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 12.567082166671753,
+          "rmse": 17.535507338693577,
+          "nasa_score": 728.2704094955824
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD002",
+      "model": "xgboost",
+      "run_dir": "artifacts/portfolio/FD002/xgboost/seed_42",
+      "sha256": {
+        "config.yaml": "74db7bfbf67769709f8a819530f24f0c9f375fde9aa1cb688a4d2c781ade2dde",
+        "metadata.json": "3658322b5060782a7a4545b741cefbc336858a79558842c80184690c711ae693",
+        "preprocessor.joblib": "0b1a9e00c80825c6212e08a7cd501f1c68c8bbe9da2f085fe608a1bda256b690",
+        "training_summary.json": "ff284aade5ee4f89f0e3296099dc692c5585c27b77805c6849f423aaa384967c",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "0f0d8b52cf0710e36467537e68e9cb1defbb48e32f6ecff26209d9e419cc303a",
+        "test_predictions.csv": "6a2acff7aa22c9415f4f94f8cb2c32dc6879e2dbebbca27981ffa396c702a889",
+        "model.joblib": "a0d859a100794dd284a535849e64852b3f584ff541e73f7ccfe22a447b97270b",
+        "xgb_feature_names.json": "99f5265fdaaf5d6419271e04e9426581aedd76ef82db838df18126da95dc2a8d"
+      },
+      "evaluation": {
+        "subset": "FD002",
+        "model": "xgboost",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 10.049270961275433,
+          "rmse": 13.539458570222385,
+          "nasa_score": 767.2355218369037
+        },
+        "n_test_engines": 259
+      }
+    },
+    {
+      "subset": "FD002",
+      "model": "lstm",
+      "run_dir": "artifacts/portfolio/FD002/lstm/seed_42",
+      "sha256": {
+        "config.yaml": "74db7bfbf67769709f8a819530f24f0c9f375fde9aa1cb688a4d2c781ade2dde",
+        "metadata.json": "8df92870018655ec9c3d5fab922326f905f09ef388f019faa8c3d25d1a19deee",
+        "preprocessor.joblib": "0b1a9e00c80825c6212e08a7cd501f1c68c8bbe9da2f085fe608a1bda256b690",
+        "training_summary.json": "1f84ed0cfea0bba845f2d7967cb79177a26759052862149d44e9660c33e8f4be",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "d4291d52c9b1365cde0a88c8b951f1cef5ddc8e32fc6f9bfab78139d03a6440a",
+        "test_predictions.csv": "d812524205c39cc8c3b3106a724a918a5fa5a9cbba15a603e4963b6e23d6bc90",
+        "best.pt": "d3b03b4e2bc0032fcf5bc66a6718e445181ac08b5d86034c5ad61f9523899b30",
+        "training_log.csv": "ac79273949f1bb06fc2400d9e449265998ef872d0b883bbdcef772f31e88eb5a"
+      },
+      "evaluation": {
+        "subset": "FD002",
+        "model": "lstm",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 12.832591837437457,
+          "rmse": 17.594574850990057,
+          "nasa_score": 2529.559757131832
+        },
+        "n_test_engines": 259
+      }
+    },
+    {
+      "subset": "FD002",
+      "model": "gru",
+      "run_dir": "artifacts/portfolio/FD002/gru/seed_42",
+      "sha256": {
+        "config.yaml": "74db7bfbf67769709f8a819530f24f0c9f375fde9aa1cb688a4d2c781ade2dde",
+        "metadata.json": "e11968cacd4cc5510b205250595b9edb2e0d02644e7d040b81990b26cfc817e3",
+        "preprocessor.joblib": "0b1a9e00c80825c6212e08a7cd501f1c68c8bbe9da2f085fe608a1bda256b690",
+        "training_summary.json": "5729f118657f3101de27ab2be6eddc255b5a7aededb5af1e26e3456d50c75c0b",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "3baec303d78bcd02780c7f3a5af56babc007dd22f43ae5adb48f46ebc6c16395",
+        "test_predictions.csv": "f180721539d9e746e9b614b8b964cf44bf21fac31c21fa1ddaa6ee8f46e00f7d",
+        "best.pt": "2bc127eaa22eae4b6be137cd1ac2c7735d4686cfc74c258ad94d75553f5d77fe",
+        "training_log.csv": "a8e08133b6082a17a713e84135c5aa5f455ae9e99acfb841ae861b370bb710ef"
+      },
+      "evaluation": {
+        "subset": "FD002",
+        "model": "gru",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 12.16113578674876,
+          "rmse": 16.15411786623169,
+          "nasa_score": 1292.005891274302
+        },
+        "n_test_engines": 259
+      }
+    },
+    {
+      "subset": "FD002",
+      "model": "transformer",
+      "run_dir": "artifacts/portfolio/FD002/transformer/seed_42",
+      "sha256": {
+        "config.yaml": "74db7bfbf67769709f8a819530f24f0c9f375fde9aa1cb688a4d2c781ade2dde",
+        "metadata.json": "866c619d996c4780bc2f1072349af59169dafe7d53b7ab6c3f22bb62fb3d3024",
+        "preprocessor.joblib": "0b1a9e00c80825c6212e08a7cd501f1c68c8bbe9da2f085fe608a1bda256b690",
+        "training_summary.json": "77f9c089e82f087041f255b97ee474d04a99965ff2b6be997456703931a97d08",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "4be14d0c59bfaba55801ca678458f5d635298a24d0e9e02ea889e04e0c97562a",
+        "test_predictions.csv": "f1c9b3f1791b5e1ccfb4e88636d47701031d7065e848d596768b423479693ace",
+        "best.pt": "284c84d662dd5e26f3793be966955fcd2bd421ddf050bb8d1ebc9be2ac3a9579",
+        "training_log.csv": "fdaeefa2805dfeafdedb9e4857e6d23b1ac215c57169ac06315d69a99d9510ba"
+      },
+      "evaluation": {
+        "subset": "FD002",
+        "model": "transformer",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 10.83657990551363,
+          "rmse": 14.924065310739632,
+          "nasa_score": 982.9316623655893
+        },
+        "n_test_engines": 259
+      }
+    },
+    {
+      "subset": "FD003",
+      "model": "xgboost",
+      "run_dir": "artifacts/portfolio/FD003/xgboost/seed_42",
+      "sha256": {
+        "config.yaml": "7cf634a9bff4f5b47651bb702c99c65dd5e8e41d9977bf2ec319ab7973990770",
+        "metadata.json": "064808a68f130c49bc67f5426378703c3e089f3b0d3e87d1dcb9c32852f40c57",
+        "preprocessor.joblib": "4c0f9cbd5896e7105481c3bdd91f43eb9dc4e81c2ff844fed87e1866062c904b",
+        "training_summary.json": "7bbe6a6f801a447f1b2aafca236d6edcb3d1039acb44ee1c5b8825b873185629",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "28195db5ca489217afc2778eb5bb40ae325813d35ce4b5668029a5cd1a452599",
+        "test_predictions.csv": "1d75c45239aae8f7ad0a64848d953d7ec00cce0425e20fc9218a6fc198f82914",
+        "model.joblib": "a8dcdb17eaeb4b5715e3d675decf109cb59727f0b8240a962f8ece4713108fd3",
+        "xgb_feature_names.json": "d8b078c957b17e6389b1958df39e87db56589f284b27decdad6a6b17453c68a1"
+      },
+      "evaluation": {
+        "subset": "FD003",
+        "model": "xgboost",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 9.56478397846222,
+          "rmse": 13.294547110234332,
+          "nasa_score": 345.09123144268904
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD003",
+      "model": "lstm",
+      "run_dir": "artifacts/portfolio/FD003/lstm/seed_42",
+      "sha256": {
+        "config.yaml": "7cf634a9bff4f5b47651bb702c99c65dd5e8e41d9977bf2ec319ab7973990770",
+        "metadata.json": "ca190e26a173af676e9a7cd8f0c2c53ec74177345ff9af7876b988472159d1ee",
+        "preprocessor.joblib": "4c0f9cbd5896e7105481c3bdd91f43eb9dc4e81c2ff844fed87e1866062c904b",
+        "training_summary.json": "2ea7719f5cdededd30ecf4493ddd66231454318416c53402946549f17807fd81",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "c844a7b65e3e9dea9981afc46ae6b0fbe6804138c9ab32133d135133a181808f",
+        "test_predictions.csv": "24c0931325ec9ad427a594d86b8ad2fec52aa529750b9c509773444e61daa5af",
+        "best.pt": "faf9862bdacf091426749455b877a2e598a6971d7caa325d07ca8fd72eb6a726",
+        "training_log.csv": "2816422b10f7f505748adfc4046d8dc1c069ccc9e6e3050befa1ddcea46f0a50"
+      },
+      "evaluation": {
+        "subset": "FD003",
+        "model": "lstm",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 35.522887268066405,
+          "rmse": 42.31459354900983,
+          "nasa_score": 41613.084366932606
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD003",
+      "model": "gru",
+      "run_dir": "artifacts/portfolio/FD003/gru/seed_42",
+      "sha256": {
+        "config.yaml": "7cf634a9bff4f5b47651bb702c99c65dd5e8e41d9977bf2ec319ab7973990770",
+        "metadata.json": "5a71dad1da3c2f39d3ee524112b68cc80d102ab7073548d18f054a45327b4d70",
+        "preprocessor.joblib": "4c0f9cbd5896e7105481c3bdd91f43eb9dc4e81c2ff844fed87e1866062c904b",
+        "training_summary.json": "134c9683d827875cd3f2fd4e35f1f21c4ce0e6f8cb9ea6605079c137c98f1ede",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "212e401bff5fa16dffbd07ab5994590c7fdefcab4603e19b2d1ddb462b023694",
+        "test_predictions.csv": "0cfe2ca8d03d6192f62251953eeb81af11863c1fddfa9b194d8bf8a2fbbaa177",
+        "best.pt": "538bd58b721addedda871c46fed6d6c08d55aebc8f299c9e9b6118d237da72ef",
+        "training_log.csv": "318f9ab56354e755968660c53d033213323a8b78177c99701e485ad45181f87d"
+      },
+      "evaluation": {
+        "subset": "FD003",
+        "model": "gru",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 30.989309234619142,
+          "rmse": 36.93504330827764,
+          "nasa_score": 14468.31804511517
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD003",
+      "model": "transformer",
+      "run_dir": "artifacts/portfolio/FD003/transformer/seed_42",
+      "sha256": {
+        "config.yaml": "7cf634a9bff4f5b47651bb702c99c65dd5e8e41d9977bf2ec319ab7973990770",
+        "metadata.json": "966481809a179cc7fe6b196acef9caf1cd320cbfe73a324f31bd19458a138c73",
+        "preprocessor.joblib": "4c0f9cbd5896e7105481c3bdd91f43eb9dc4e81c2ff844fed87e1866062c904b",
+        "training_summary.json": "3659d5ecb6b1f9d0fad65d45a2bb0146f9eca28859aa009c9a8886bb19f175b3",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "23f90fa1766455fa84abc00116229c921b83d26d88a447876c5b3b11b1750808",
+        "test_predictions.csv": "b7db463fc433a84285905fcc4e844ba6d1100af41158844b6108eb0319e4ff29",
+        "best.pt": "2843c0843f09509222616477ac51e5104740bd82d98e6fa83cc9803936ce38e3",
+        "training_log.csv": "2a163af39e28c7b8bee7596c00a78a52a24cc59fe8186497ac74c5cbe6221763"
+      },
+      "evaluation": {
+        "subset": "FD003",
+        "model": "transformer",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 14.34371561050415,
+          "rmse": 18.191383132021393,
+          "nasa_score": 1029.133557559386
+        },
+        "n_test_engines": 100
+      }
+    },
+    {
+      "subset": "FD004",
+      "model": "xgboost",
+      "run_dir": "artifacts/portfolio/FD004/xgboost/seed_42",
+      "sha256": {
+        "config.yaml": "b834f2b3ccb180aecc5361d07b02b2804b696b4147cb79d648270099ff56e005",
+        "metadata.json": "189a05fc5107f5a37a76a4c03ef5e4d5033a393aa92418a3076788e26aee53f2",
+        "preprocessor.joblib": "33d4eeedca71533429b6a0e99f50bd3bb420e0f3ca46ca4014b4156a28e4af3f",
+        "training_summary.json": "a35105ff8abf05dbd139a6d84e41a9da40241e2da9e118954ef8428319929ba4",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "7afcad3dd0e00dd60584eade7ac0c9809e972bd6817372f666859cbe6d22774e",
+        "test_predictions.csv": "9e596dd640839fff52c519138aa3141d533d4be114d4093eaa24e1c9e86504bd",
+        "model.joblib": "f2bfcbb5dedcd9a6ebd0c166dc7ffd67a5c7bda96f433dfb2be10e72767a09c4",
+        "xgb_feature_names.json": "99f5265fdaaf5d6419271e04e9426581aedd76ef82db838df18126da95dc2a8d"
+      },
+      "evaluation": {
+        "subset": "FD004",
+        "model": "xgboost",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 11.676785909360454,
+          "rmse": 16.569442594656522,
+          "nasa_score": 1877.2017542035583
+        },
+        "n_test_engines": 248
+      }
+    },
+    {
+      "subset": "FD004",
+      "model": "lstm",
+      "run_dir": "artifacts/portfolio/FD004/lstm/seed_42",
+      "sha256": {
+        "config.yaml": "b834f2b3ccb180aecc5361d07b02b2804b696b4147cb79d648270099ff56e005",
+        "metadata.json": "7499a94bf35dc45db9e63b4eebd2c02052f74cb9239a13f9c92aafcfe2a72e08",
+        "preprocessor.joblib": "33d4eeedca71533429b6a0e99f50bd3bb420e0f3ca46ca4014b4156a28e4af3f",
+        "training_summary.json": "49d3df9f263ef7f21bc3130ab804fedf807f73729bb2836720cbcd590977308e",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "2205bd78917c7ce42e369504493ce3ae613f4d7afb9633342d3b85f5c1927398",
+        "test_predictions.csv": "6a002d1fa92374e8d0e105c6113d328d189e657b36cda4912bfa1e60a652dc9c",
+        "best.pt": "967d9d751e944b35577f5544ff8f33c157a81331a2c3b087c28c60a5b8a41049",
+        "training_log.csv": "eb976343c3528ac61bfc359cb9c8605ee05a43351868a01b4f6f3a90ce520946"
+      },
+      "evaluation": {
+        "subset": "FD004",
+        "model": "lstm",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 15.407256676304725,
+          "rmse": 20.73032724674177,
+          "nasa_score": 4017.6013091098043
+        },
+        "n_test_engines": 248
+      }
+    },
+    {
+      "subset": "FD004",
+      "model": "gru",
+      "run_dir": "artifacts/portfolio/FD004/gru/seed_42",
+      "sha256": {
+        "config.yaml": "b834f2b3ccb180aecc5361d07b02b2804b696b4147cb79d648270099ff56e005",
+        "metadata.json": "aaa2f377dfd946269d5c9e3be0a94d8b91ba4faee76647adc6bc968626a2802f",
+        "preprocessor.joblib": "33d4eeedca71533429b6a0e99f50bd3bb420e0f3ca46ca4014b4156a28e4af3f",
+        "training_summary.json": "569668d76ec0d7ee7107df5a2bd15eb69426ef5b2584eaec0eb0ce80b0b33769",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "6883b4a5f448fb0fd0fd1ad95cf5fcc263dd5ec9c4e9db54b1425d129492a1f7",
+        "test_predictions.csv": "ee868c123df46f22189e53c381f3c71d7d86a30f83d53dbbeac9ebd0a4820931",
+        "best.pt": "8b3f016ac24a66db42e6fbec315c8583bc4e29638f1e612608c5648087881214",
+        "training_log.csv": "5736456d57543ef47c607d17feb18412c8142b6d1e50412a3064c494da3ea411"
+      },
+      "evaluation": {
+        "subset": "FD004",
+        "model": "gru",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 14.540271389868952,
+          "rmse": 20.14539018278434,
+          "nasa_score": 3444.6390013510204
+        },
+        "n_test_engines": 248
+      }
+    },
+    {
+      "subset": "FD004",
+      "model": "transformer",
+      "run_dir": "artifacts/portfolio/FD004/transformer/seed_42",
+      "sha256": {
+        "config.yaml": "b834f2b3ccb180aecc5361d07b02b2804b696b4147cb79d648270099ff56e005",
+        "metadata.json": "3068012d304092224e14c065dd5b486f708f9ca4c2947e9493f558cd7ea6563a",
+        "preprocessor.joblib": "33d4eeedca71533429b6a0e99f50bd3bb420e0f3ca46ca4014b4156a28e4af3f",
+        "training_summary.json": "182e04e7a64c55ad10d517254f50f71a758406a2ce454c5d9c4a8008a0de1992",
+        "feature_list.json": "5228b42423f0eefbe45b40497b368018ac0790f3ea08674c1d3b1f2082ed687f",
+        "test_metrics.json": "c7caeb373a91ef6cb0f6f7a7b35c8fe25ffb92f795e6ce71ba5d3c1d0fdf4a37",
+        "test_predictions.csv": "3cce03498ce3eae6b527e7c8b4aed700e1802aa4e43a85279ec9c96f3bf64775",
+        "best.pt": "cc33ddf31d8d7d486968f66cfa5fcb1ae8fad5353e7082b334cdbb8dafda6e23",
+        "training_log.csv": "b08d21a0233182debdbec0eb3b0bb9083454cea915713971bfbc4480f4a3165b"
+      },
+      "evaluation": {
+        "subset": "FD004",
+        "model": "transformer",
+        "seed": 42,
+        "test_metrics": {
+          "mae": 13.667244115183431,
+          "rmse": 19.12911215464216,
+          "nasa_score": 3884.9570784022917
+        },
+        "n_test_engines": 248
+      }
+    }
+  ]
+}

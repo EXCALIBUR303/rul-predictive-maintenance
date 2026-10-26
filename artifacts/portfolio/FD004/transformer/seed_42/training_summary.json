@@ -1,0 +1,10 @@
+{
+  "model": "transformer",
+  "seed": 42,
+  "best_epoch": 3,
+  "best_val_rmse": 17.880712842183378,
+  "parameter_count": 10241,
+  "train_time_seconds": 21.528985023498535,
+  "artifact": "artifacts/portfolio/FD004/transformer/seed_42/best.pt",
+  "last_artifact": "artifacts/portfolio/FD004/transformer/seed_42/last.pt"
+}

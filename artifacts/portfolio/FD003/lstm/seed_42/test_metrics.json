@@ -1,0 +1,11 @@
+{
+  "subset": "FD003",
+  "model": "lstm",
+  "seed": 42,
+  "test_metrics": {
+    "mae": 35.522887268066405,
+    "rmse": 42.31459354900983,
+    "nasa_score": 41613.084366932606
+  },
+  "n_test_engines": 100
+}

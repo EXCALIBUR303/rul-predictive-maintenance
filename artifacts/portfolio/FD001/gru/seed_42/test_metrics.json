@@ -1,0 +1,11 @@
+{
+  "subset": "FD001",
+  "model": "gru",
+  "seed": 42,
+  "test_metrics": {
+    "mae": 34.46153129577637,
+    "rmse": 40.49939111276144,
+    "nasa_score": 21381.11494335436
+  },
+  "n_test_engines": 100
+}

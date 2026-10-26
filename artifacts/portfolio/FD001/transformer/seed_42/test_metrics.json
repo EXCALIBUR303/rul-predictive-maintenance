@@ -1,0 +1,11 @@
+{
+  "subset": "FD001",
+  "model": "transformer",
+  "seed": 42,
+  "test_metrics": {
+    "mae": 12.567082166671753,
+    "rmse": 17.535507338693577,
+    "nasa_score": 728.2704094955824
+  },
+  "n_test_engines": 100
+}

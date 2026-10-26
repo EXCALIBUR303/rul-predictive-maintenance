@@ -1,0 +1,11 @@
+{
+  "model": "xgboost",
+  "seed": 42,
+  "val_metrics": {
+    "mae": 11.372004232299474,
+    "rmse": 15.515855120760651,
+    "nasa_score": 48667.14379828375
+  },
+  "train_time_seconds": 1.2309868335723877,
+  "artifact": "artifacts/portfolio/FD002/xgboost/seed_42/model.joblib"
+}
