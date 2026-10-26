@@ -54,12 +54,12 @@ export default function Charts({
     ),
   }));
   const bins = Array.from({ length: 9 }, (_, i) => ({
-    bin: `${i * 5 - 20}`,
+    bin: i === 0 ? "<−17.5" : i === 8 ? "≥17.5" : `${i * 5 - 20}`,
     count: points.filter(
       (p) =>
         p.xgboost !== undefined &&
-        p.xgboost - p.actual >= i * 5 - 22.5 &&
-        p.xgboost - p.actual < i * 5 - 17.5,
+        (i === 0 || p.xgboost - p.actual >= i * 5 - 22.5) &&
+        (i === 8 || p.xgboost - p.actual < i * 5 - 17.5),
     ).length,
   }));
   return (

@@ -27,7 +27,7 @@ def test_real_export_has_no_fitted_engines_or_synthetic_predictions(subset):
   assert {e['id'] for e in d['engines']}<=set(metadata['val_units'])
   assert not {e['id'] for e in d['engines']}&set(metadata['train_units'])
   assert d['apiParityMaxAbsError'][model]<.001
-  assert len(d['importance'][model])==len(d['sensors'])
+  assert len(d['importance'][model])==21
   for e in d['engines']:
    assert all(np.isfinite(p[model]) and 0<=p[model]<=125 for p in e['points'])
    assert all(np.isfinite(p['whatIf'][model]['4']['10']) for p in e['points'])

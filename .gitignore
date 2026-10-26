@@ -14,3 +14,5 @@ outputs/*.zip
 *.pt
 *.pth
 *.jsonl.gz
+artifacts/portfolio/**/latest/
+artifacts/portfolio/**/plots/

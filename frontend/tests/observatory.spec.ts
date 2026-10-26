@@ -49,7 +49,7 @@ for (const width of [360, 768, 1440]) {
     ).toBeVisible();
     await page.getByRole("button", { name: "Run what-if" }).click();
     await expect(page.getByRole("status")).toContainText(
-      "Illustrative sensitivity",
+      "XGBoost checkpoint what-if",
     );
     await page.getByRole("slider", { name: "Sensor 2 adjustment" }).fill("5");
     await expect(
@@ -77,9 +77,11 @@ for (const width of [360, 768, 1440]) {
       .getByRole("combobox", { name: "Benchmark dataset" })
       .selectOption("FD002");
     await expect(
-      page.getByRole("heading", { name: "No published evaluation for FD002" }),
+      page.getByText("FD002 · Reduced-budget checkpoints", { exact: false }),
     ).toBeVisible();
-    await page.getByRole("button", { name: "View FD004 benchmarks" }).click();
+    await page
+      .getByRole("combobox", { name: "Benchmark dataset" })
+      .selectOption("FD004");
     await page.screenshot({ path: `qa/arena-${width}.png`, fullPage: true });
     await page
       .getByRole("button", { name: "Dataset explorer", exact: true })
@@ -110,14 +112,18 @@ for (const width of [360, 768, 1440]) {
       ).violations,
     ).toEqual([]);
     await page.screenshot({ path: `qa/light-${width}.png`, fullPage: true });
+    const dataset = await (await page.request.get("/demo.json")).json();
+    const engineName = dataset.engines[0].name;
     await page.keyboard.press("Control+k");
     await expect(page.getByRole("dialog")).toBeVisible();
     await page
       .getByRole("searchbox", { name: "Search commands" })
-      .fill("ENG-003");
-    await page.getByRole("button", { name: "ENG-003 Engine detail" }).click();
+      .fill(engineName);
+    await page
+      .getByRole("button", { name: `${engineName} Engine detail` })
+      .click();
     await expect(
-      page.getByRole("heading", { name: "ENG-003 / digital workspace" }),
+      page.getByRole("heading", { name: `${engineName} / digital workspace` }),
     ).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -153,10 +159,26 @@ test("risk filtering and replay threshold alert", async ({ page }) => {
   await page
     .getByRole("combobox", { name: "Filter health" })
     .selectOption("critical");
-  await expect(page.getByRole("button", { name: /Open ENG-/ })).toHaveCount(3);
+  const d = await (await page.request.get("/demo.json")).json();
+  const critical = d.engines.filter(
+    (e: { current: number; points: { xgboost: number }[] }) =>
+      e.points[e.current - 1].xgboost <= 30,
+  ).length;
+  await expect(page.getByRole("button", { name: /Open ENG-/ })).toHaveCount(
+    critical,
+  );
   await page.getByRole("button", { name: "Explore an engine" }).click();
   const dataset = await (await page.request.get("/demo.json")).json();
-  const points = dataset.engines[0].points as {
+  const target = dataset.engines.find((e: { points: { xgboost: number }[] }) =>
+    e.points.some(
+      (p, i, a) => i > 0 && a[i - 1].xgboost > 30 && p.xgboost <= 30,
+    ),
+  );
+  expect(target).toBeTruthy();
+  await page
+    .getByRole("combobox", { name: "Selected engine" })
+    .selectOption(String(target.id));
+  const points = target.points as {
     cycle: number;
     xgboost: number;
   }[];
@@ -173,4 +195,42 @@ test("risk filtering and replay threshold alert", async ({ page }) => {
   await page.getByRole("button", { name: "Pause replay" }).click();
   await page.getByRole("button", { name: "Reset replay" }).click();
   await expect(page.getByRole("slider", { name: /Cycle / })).toHaveValue("1");
+});
+
+test("all four real datasets and model-based what-if", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: /Open ENG-/ })).toHaveCount(12);
+  for (const subset of ["FD001", "FD002", "FD003", "FD004"]) {
+    await page
+      .getByRole("button", { name: "Fleet overview", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Workspace dataset" })
+      .selectOption(subset);
+    await expect(page.getByRole("button", { name: /Open ENG-/ })).toHaveCount(
+      12,
+    );
+    await expect(
+      page.getByText(`C-MAPSS ${subset} held-out validation engines`, {
+        exact: false,
+      }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Explore an engine" }).click();
+    const dataset = await (
+      await page.request.get(`/demo-${subset}.json`)
+    ).json();
+    const engine = dataset.engines[0];
+    await page.getByRole("slider", { name: /Cycle / }).fill("100");
+    await page
+      .getByRole("combobox", { name: "Importance / what-if model" })
+      .selectOption("transformer");
+    await page.getByRole("slider", { name: "Sensor 4 adjustment" }).fill("10");
+    await page.getByRole("button", { name: "Run what-if" }).click();
+    await expect(page.getByRole("status")).toContainText(
+      `Transformer checkpoint what-if: ${engine.points[99].whatIf.transformer["4"]["10"].toFixed(1)}`,
+    );
+    await expect(
+      page.getByText("Permutation Δ MAE", { exact: false }),
+    ).toBeVisible();
+  }
 });

@@ -5,6 +5,7 @@ export type Point = {
   actual: number;
   sensors: Record<string, number>;
   row: Record<string, number>;
+  whatIf?: Partial<Record<Model, Record<string, Record<string, number>>>>;
 } & Partial<Record<Model, number>>;
 export type Engine = {
   id: number;
@@ -18,7 +19,7 @@ export type Metric = {
   mae_mean: number;
   rmse_mean: number;
   nasa_score_mean: number;
-  rmse_std: number;
+  rmse_std: number | null;
 };
 export type Dataset = {
   schemaVersion: number;
@@ -30,6 +31,11 @@ export type Dataset = {
   engines: Engine[];
   correlation: number[][];
   metrics: Record<string, Metric[]>;
+  metricSources?: Record<string, string>;
+  importance?: Partial<
+    Record<Model, { sensor: number; deltaMae: number; retained: boolean }[]>
+  >;
+  importanceSource?: string;
 };
 export const status = (rul: number) =>
   rul <= 30 ? "critical" : rul <= 60 ? "watch" : "healthy";

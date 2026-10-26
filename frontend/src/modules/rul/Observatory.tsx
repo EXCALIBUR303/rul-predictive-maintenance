@@ -159,7 +159,7 @@ function EngineArt() {
           CORE ASSEMBLY
         </text>
       </svg>
-      <span className={s.artLabel}>C-MAPSS / TURBOFAN SYSTEM</span>
+      <span className={s.artLabel}>ILLUSTRATIVE TURBOFAN SCHEMATIC</span>
     </div>
   );
 }
@@ -193,13 +193,26 @@ export default function Observatory() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("risk");
   const [subset, setSubset] = useState("FD004");
+  const [activeSubset, setActiveSubset] = useState("FD004");
+  const loadingRequest = useRef<AbortController | null>(null);
   const [active, setActive] = useState<Model[]>([...models]);
   const load = useCallback(async () => {
+    loadingRequest.current?.abort();
+    const controller = new AbortController();
+    loadingRequest.current = controller;
+    setPlaying(false);
     setLoading(true);
     setLoadError("");
     try {
       const r = await fetch(
-        process.env.NEXT_PUBLIC_RUL_DATA_URL || "/demo.json",
+        process.env.NEXT_PUBLIC_RUL_DATA_URL?.replace(
+          "{subset}",
+          activeSubset,
+        ) ||
+          (activeSubset === "FD004"
+            ? "/demo.json"
+            : `/demo-${activeSubset}.json`),
+        { signal: controller.signal },
       );
       if (!r.ok) throw Error(`Dataset request failed (${r.status})`);
       const d = await r.json();
@@ -210,15 +223,23 @@ export default function Observatory() {
         !d.engines.every((e: Engine) => e.points?.length)
       )
         throw Error("Unsupported or empty dataset export");
+      if (d.subset !== activeSubset)
+        throw Error("Dataset export does not match selected subset");
       setData(d);
+      useRul.setState({
+        engine: d.engines[0].id,
+        cycle: d.engines[0].current,
+        playing: false,
+      });
       setActive(d.models);
       setSubset(d.subset);
     } catch (e) {
+      if (controller.signal.aborted) return;
       setLoadError(e instanceof Error ? e.message : "Dataset unavailable");
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
-  }, []);
+  }, [activeSubset, setPlaying]);
   useEffect(() => {
     const task = setTimeout(() => void load(), 0);
     return () => clearTimeout(task);
@@ -245,7 +266,7 @@ export default function Observatory() {
       const after = status(point.xgboost ?? point.actual);
       if (before !== after && after !== "healthy")
         setToast(
-          `${selected.name}: ${after} threshold crossed at cycle ${next}. Illustrative alert; not maintenance advice.`,
+          `${selected.name}: ${after} threshold crossed at cycle ${next}. Illustrative alert thresholds; not maintenance advice.`,
         );
       setCycle(next);
     }, 1000 / speed);
@@ -440,24 +461,39 @@ export default function Observatory() {
                         : view === "Engine detail"
                           ? "Scrub through an engine’s life. Every view follows the same cycle."
                           : view === "Model arena"
-                            ? "Published benchmarks alongside an explicitly labeled illustrative replay. Lower error is better."
+                            ? "Real reduced-budget checkpoints across all four subsets. Lower error is better; three-epoch neural models are not production models."
                             : "Explore operating conditions, sensor relationships, and the data behind the models."}
                     </p>
                   </div>
-                  <Button
-                    onClick={() =>
-                      view === "Fleet overview"
-                        ? select(1, data?.engines[0].current ?? 120)
-                        : navigate("Fleet overview")
-                    }
-                  >
-                    <span>
-                      {view === "Fleet overview"
-                        ? "Explore an engine"
-                        : "Back to fleet"}
-                    </span>
-                    <ArrowRight size={14} />
-                  </Button>
+                  <div className={s.controls}>
+                    <label htmlFor="workspace-subset">Workspace dataset</label>
+                    <select
+                      id="workspace-subset"
+                      value={activeSubset}
+                      onChange={(e) => setActiveSubset(e.target.value)}
+                    >
+                      {["FD001", "FD002", "FD003", "FD004"].map((d) => (
+                        <option key={d}>{d}</option>
+                      ))}
+                    </select>
+                    <Button
+                      onClick={() =>
+                        view === "Fleet overview"
+                          ? select(
+                              data?.engines[0].id ?? 1,
+                              data?.engines[0].current ?? 120,
+                            )
+                          : navigate("Fleet overview")
+                      }
+                    >
+                      <span>
+                        {view === "Fleet overview"
+                          ? "Explore an engine"
+                          : "Back to fleet"}
+                      </span>
+                      <ArrowRight size={14} />
+                    </Button>
+                  </div>
                 </div>
                 {loading ? (
                   <div role="status" aria-label="Loading fleet">
@@ -509,7 +545,7 @@ export default function Observatory() {
                                 totals.reduce((a, b) => a + b, 0) /
                                   totals.length,
                               ),
-                              note: "Cycles · illustrative predictions",
+                              note: "Cycles · real checkpoint predictions",
                               icon: Gauge,
                             },
                           ].map(({ label, value, note, icon: Icon }) => (
@@ -546,7 +582,7 @@ export default function Observatory() {
                             <Button
                               variant="ghost"
                               onClick={() => {
-                                select(1, 1);
+                                select(data.engines[0].id, 1);
                                 setPlaying(true);
                               }}
                             >
@@ -792,12 +828,12 @@ export default function Observatory() {
                             {
                               label: "Predicted RUL · XGBoost",
                               value: value,
-                              note: "Illustrative unless exported from artifact",
+                              note: "Real reduced-budget checkpoint",
                             },
                             {
                               label: "Actual remaining life",
                               value: current.actual,
-                              note: "Capped at 125 · training trajectory",
+                              note: "Capped at 125 · validation trajectory",
                             },
                             {
                               label: "Cycles observed",
@@ -829,7 +865,7 @@ export default function Observatory() {
                               </p>
                             </div>
                             <span className={s.badge}>
-                              30-cycle alert guide
+                              Illustrative 30-cycle alert guide
                             </span>
                           </div>
                           <ModelToggles
@@ -855,7 +891,8 @@ export default function Observatory() {
                           <Explain
                             engine={selected}
                             cycle={cycle}
-                            value={value}
+                            data={data}
+                            key={`${data.subset}-${selected.id}`}
                           />
                         </div>
                       </>
@@ -863,7 +900,7 @@ export default function Observatory() {
                     {view === "Model arena" && (
                       <>
                         <div className={s.toolbar}>
-                          <h2>Published benchmark / held-out test engines</h2>
+                          <h2>Checkpoint evaluation / official test engines</h2>
                           <select
                             aria-label="Benchmark dataset"
                             value={subset}
@@ -918,7 +955,7 @@ export default function Observatory() {
                                     {m.rmse_mean.toFixed(2)}
                                   </div>
                                   <p className={s.statNote}>
-                                    ± {m.rmse_std.toFixed(2)} across three seeds
+                                    Single seed 42 · no variance estimate
                                   </p>
                                   <div className={s.metricLine}>
                                     <span className={s.muted}>NASA score</span>
@@ -934,8 +971,9 @@ export default function Observatory() {
                             <DataTable>
                               <table>
                                 <caption className={s.muted}>
-                                  Published {subset} aggregate results · seeds
-                                  42, 1337, 2026
+                                  {subset} ·{" "}
+                                  {data.metricSources?.[subset] ??
+                                    "Metric provenance unavailable"}
                                 </caption>
                                 <thead>
                                   <tr>
@@ -968,8 +1006,8 @@ export default function Observatory() {
                         <section className={s.panel}>
                           <h2>Per-engine residuals / preview snapshots</h2>
                           <p className={s.subtitle}>
-                            Predicted minus actual RUL, in cycles · illustrative
-                            unless exported from trained artifacts
+                            Predicted minus actual RUL, in cycles · real
+                            validation-engine predictions
                           </p>
                           <DataTable>
                             <table>
@@ -1062,16 +1100,16 @@ export default function Observatory() {
                         <div className={s.toolbar}>
                           <h2>Dataset workspace</h2>
                           <select
-                            value={subset}
+                            value={activeSubset}
                             aria-label="Explore dataset"
-                            onChange={(e) => setSubset(e.target.value)}
+                            onChange={(e) => setActiveSubset(e.target.value)}
                           >
                             {["FD001", "FD002", "FD003", "FD004"].map((d) => (
                               <option key={d}>{d}</option>
                             ))}
                           </select>
                         </div>
-                        {subset !== data.subset ? (
+                        {activeSubset !== data.subset ? (
                           <div className={s.empty}>
                             <Database />
                             <h2>{subset} trajectories are not installed</h2>
@@ -1088,9 +1126,9 @@ export default function Observatory() {
                           <>
                             <div className={s.notice}>
                               {data.trajectorySource}. Correlations use the full
-                              training subset; replay uses 12 selected engines.
-                              Correlation does not establish causal sensor
-                              importance.
+                              training subset; replay uses {data.engines.length}{" "}
+                              held-out validation engines. Correlation does not
+                              establish causal sensor importance.
                             </div>
                             <div className={s.twoCol}>
                               <section className={s.panel}>
@@ -1203,10 +1241,30 @@ export default function Observatory() {
                                   </thead>
                                   <tbody>
                                     {[
-                                      ["FD001", "1", "1", "Metrics only"],
-                                      ["FD002", "6", "1", "Not installed"],
-                                      ["FD003", "1", "2", "Not installed"],
-                                      ["FD004", "6", "2", "Raw data + metrics"],
+                                      [
+                                        "FD001",
+                                        "1",
+                                        "1",
+                                        "Verified raw + real models",
+                                      ],
+                                      [
+                                        "FD002",
+                                        "6",
+                                        "1",
+                                        "Verified raw + real models",
+                                      ],
+                                      [
+                                        "FD003",
+                                        "1",
+                                        "2",
+                                        "Verified raw + real models",
+                                      ],
+                                      [
+                                        "FD004",
+                                        "6",
+                                        "2",
+                                        "Verified raw + real models",
+                                      ],
                                     ].map((row) => (
                                       <tr key={row[0]}>
                                         {row.map((c, i) => (
@@ -1420,24 +1478,25 @@ function PointTable({ points }: { points: Engine["points"] }) {
 function Explain({
   engine,
   cycle,
-  value,
+  data,
 }: {
   engine: Engine;
   cycle: number;
-  value: number;
+  data: Dataset;
 }) {
   const [changes, setChanges] = useState<Record<string, number>>({
     "2": 0,
     "4": 0,
     "11": 0,
   });
+  const [importanceModel, setImportanceModel] = useState<Model>("xgboost");
   const [result, setResult] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [resultModel, setResultModel] = useState("");
   const request = useRef<AbortController | null>(null);
   useEffect(() => () => request.current?.abort(), []);
-  const fingerprint = `${engine.id}/${cycle}/${JSON.stringify(changes)}`;
+  const fingerprint = `${data.subset}/${engine.id}/${cycle}/${importanceModel}/${JSON.stringify(changes)}`;
   const [resultKey, setResultKey] = useState("");
   const valid = resultKey === fingerprint;
   async function predict() {
@@ -1450,16 +1509,19 @@ function Explain({
       if (DEMO) {
         await new Promise((r) => setTimeout(r, 180));
         if (controller.signal.aborted) return;
-        setResult(
-          Math.max(
-            0,
-            Math.min(
-              125,
-              value - Object.values(changes).reduce((a, b) => a + b, 0) * 0.4,
-            ),
-          ),
-        );
-        setResultModel("Illustrative sensitivity");
+        const point = engine.points[cycle - 1];
+        const adjustment = Object.entries(changes).find(([, v]) => v !== 0);
+        const prediction = adjustment
+          ? point.whatIf?.[importanceModel]?.[adjustment[0]]?.[
+              String(adjustment[1])
+            ]
+          : point[importanceModel];
+        if (prediction === undefined)
+          throw Error(
+            "No real precomputed prediction for these inputs. No illustrative substitute is used.",
+          );
+        setResult(prediction);
+        setResultModel(`${names[importanceModel]} checkpoint what-if`);
       } else {
         const rows = engine.points
           .slice(Math.max(0, cycle - 30), cycle)
@@ -1496,18 +1558,8 @@ function Explain({
       if (!controller.signal.aborted) setBusy(false);
     }
   }
-  const p = engine.points[Math.min(cycle - 1, engine.points.length - 1)];
-  const base = engine.points[0];
-  const impacts = ["2", "4", "11"]
-    .map((id) => ({
-      id,
-      change:
-        Math.abs(
-          (p.sensors[id] - base.sensors[id]) /
-            (Math.abs(base.sensors[id]) || 1),
-        ) * 100,
-    }))
-    .sort((a, b) => b.change - a.change);
+  const impacts = (data.importance?.[importanceModel] ?? []).slice(0, 6);
+  const maximum = Math.max(0.001, ...impacts.map((x) => Math.abs(x.deltaMae)));
   return (
     <section className={s.panel}>
       <div className={s.panelHead}>
@@ -1515,22 +1567,44 @@ function Explain({
         <span className={s.badge}>Exploratory</span>
       </div>
       <p className={s.subtitle}>
-        Relative sensor drift from cycle 1, not model importance or SHAP
-        attribution.
+        {data.importanceSource ??
+          "Model importance unavailable; illustrative explanation only."}
       </p>
+      <label htmlFor="importance-model">Importance / what-if model</label>
+      <select
+        id="importance-model"
+        value={importanceModel}
+        onChange={(e) => setImportanceModel(e.target.value as Model)}
+      >
+        {models.map((m) => (
+          <option key={m} value={m}>
+            {names[m]}
+          </option>
+        ))}
+      </select>
+      {!impacts.length && (
+        <p className={s.notice}>
+          Illustrative explanation only: model importance is unavailable.
+        </p>
+      )}
       {impacts.map((x) => (
-        <div key={x.id} className={s.sensorRow}>
-          <span>Sensor {x.id}</span>
+        <div key={x.sensor} className={s.sensorRow}>
+          <span>Sensor {x.sensor}</span>
           <div className={s.bar}>
-            <span style={{ width: `${Math.min(100, x.change * 10)}%` }} />
+            <span
+              style={{ width: `${(Math.abs(x.deltaMae) / maximum) * 100}%` }}
+            />
           </div>
-          <span>{x.change.toFixed(1)}%</span>
+          <span>
+            {x.deltaMae > 0 ? "+" : ""}
+            {x.deltaMae.toFixed(2)}
+          </span>
         </div>
       ))}
       <h3 style={{ marginTop: 24 }}>What if the signal changed?</h3>
       <p className={s.subtitle}>
         {DEMO
-          ? "Demo heuristic only. Does not re-run a trained model."
+          ? "Real precomputed model output. Adjust one sensor at a time; all others reset. No interpolation."
           : "Queries the configured backend model, which may differ from the replay."}
       </p>
       {Object.entries(changes).map(([id, v]) => (
@@ -1547,10 +1621,10 @@ function Explain({
             type="range"
             min="-10"
             max="10"
-            step="1"
+            step="5"
             value={v}
             onChange={(e) =>
-              setChanges((c) => ({ ...c, [id]: +e.target.value }))
+              setChanges({ "2": 0, "4": 0, "11": 0, [id]: +e.target.value })
             }
           />
         </div>
