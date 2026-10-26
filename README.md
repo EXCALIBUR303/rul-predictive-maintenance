@@ -1,14 +1,15 @@
 # Intelligent Predictive Maintenance System
 
-A leakage-safe Remaining Useful Life (RUL) pipeline for NASA C-MAPSS FD001 and
-FD004.
+A leakage-safe Remaining Useful Life (RUL) pipeline for NASA C-MAPSS.
+Published full research comparisons cover FD001 and FD004; committed reduced-budget
+portfolio checkpoints now cover all four subsets.
 It compares XGBoost against LSTM, GRU, and a small Transformer under one
 engine-level experimental protocol, with the official test set held out until
 final evaluation.
 
 ## Interactive product UI
 
-The new **RUL Observatory** lives in [frontend/](frontend/README.md): a self-contained Next.js experience with fleet risk ranking, cycle replay, model comparison and dataset exploration. Run `cd frontend && npm ci && npm run dev`. Default demo mode needs no backend. Replay predictions are explicitly illustrative; published benchmark metrics remain real.
+The new **RUL Observatory** lives in [frontend/](frontend/README.md): a self-contained Next.js experience with fleet risk ranking, cycle replay, model comparison and dataset exploration. Run `cd frontend && npm ci && npm run dev`. Default demo mode needs no backend. Replay, sensor permutation importance and static what-if outputs now come from 16 real reduced-budget checkpoints across FD001–FD004. Original published three-seed metrics below remain distinct and unchanged.
 
 ![RUL Observatory fleet overview](frontend/qa/fleet-1440.png)
 
@@ -69,15 +70,9 @@ make eda-fd004
 make test
 ```
 
-`make data-fd001` downloads NASA's original Turbofan Engine Degradation
-Simulation archive and extracts only `train_FD001.txt`, `test_FD001.txt`, and
-`RUL_FD001.txt` into `data/raw/CMAPSSData/`. The raw data is intentionally not
-committed. Its provenance is NASA's [C-MAPSS data repository](https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/).
+`make data-all` downloads or verifies FD001–FD004 from the same pinned mirror used for FD004, checking frozen SHA-256 and Git blob identities for all twelve files. Individual targets `make data-fd001` through `make data-fd004` are also available. Raw files remain ignored under `data/raw/CMAPSSData/`. See [source and integrity notes](docs/data/README.md); mirror integrity is distinct from NASA authentication. Original provenance is NASA's [C-MAPSS data repository](https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/).
 
-NASA's full C-MAPSS download is currently unavailable. `make data-fd004` uses
-a pinned raw-text mirror whose FD001 files were verified byte-for-byte against
-the NASA archive used above; it verifies SHA-256 for each FD004 file. The
-exact fallback provenance is recorded in the FD004 experiment card.
+For the new real-model portfolio workflow, use the [frontend guide](frontend/README.md). It includes committed reduced-budget checkpoints for all four model families and subsets, exact regeneration commands, and the separate evaluation protocol. The full research commands below retain their original settings and published results.
 
 ## Reproduce The Comparison
 

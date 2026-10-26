@@ -1,96 +1,92 @@
 # RUL Observatory
 
-An embeddable Next.js + TypeScript research experience for NASA C-MAPSS. Fleet risk ranking, synchronized cycle scrubber, live replay, model overlays, published benchmarks, residual views, exploratory sensor drift, what-if controls, correlation heatmap, command palette, dark/light themes and reduced-motion support.
+A self-contained Next.js/TypeScript module for NASA C-MAPSS with **real XGBoost, LSTM, GRU and Transformer checkpoints on FD001–FD004**. The default backend-free demo serves precomputed model predictions, permutation importance and exact single-sensor what-if outputs. No synthetic replay prediction fallback remains.
 
 ![Fleet overview](qa/fleet-1440.png)
 
-[Mobile fleet](qa/fleet-360.png) · [Engine workspace](qa/engine-1440.png) · [Model arena](qa/arena-1440.png) · [Dataset explorer](qa/explorer-1440.png) · [Light theme](qa/light-1440.png)
+[Mobile](qa/fleet-360.png) · [Engine workspace](qa/engine-1440.png) · [Model arena](qa/arena-1440.png) · [Dataset explorer](qa/explorer-1440.png) · [Light theme](qa/light-1440.png)
 
 ## Run
 
-Node 22+ recommended (validated with Node 24). No Python/backend is required in the default demo mode.
+Node 22+ (validated on Node 24):
 
 ```bash
 cd frontend
 npm ci
 npm run dev
-# Production:
+# Or production:
 npm run build
 npm start
 ```
 
-The server listens on port 3000. Use `PORT` to change it. Build uses webpack: this environment's Turbopack CSS worker encountered local-socket permission failures. Dependencies are locked in package-lock.json. No remote fonts or image services are needed.
+Default port: 3000. No Python or backend is required to use the real static demo. `NEXT_PUBLIC_DEMO_MODE=true` means static delivery, **not illustrative predictions**. The workspace selector loads each subset's actual engine trajectories. `NEXT_PUBLIC_RUL_DATA_URL` optionally overrides the JSON URL; include `{subset}` as a placeholder for multi-subset hosting. A small catalog loads the fleet first; full-resolution histories and exact perturbation outputs load only when entering an analysis view. Charts also load lazily. No remote fonts or image service is required.
 
-## Evidence and demo mode
+## What is real
 
-`NEXT_PUBLIC_DEMO_MODE` defaults to true. The committed `public/demo.json` contains measured FD004 training sensor trajectories for 12 engines, measured training correlations, and **illustrative mathematical predictions**, not trained-model predictions. It includes actual capped RUL from run-to-failure training lengths. The UI states this distinction. The arena's aggregate FD001/FD004 scores come directly from the repository's published three-seed results. These are independent of replay charts. Dataset FD002/FD003 show honest empty states; FD001 has metrics but no installed trajectories.
+- All twelve raw train/test/RUL files are verified against SHA-256 and Git blob IDs from the same pinned mirror commit used for FD004. See [source manifest](../docs/data/cmapss-manifest.json) and [integrity notes](../docs/data/README.md). Mirror integrity is not an independent NASA signature.
+- Sixteen trusted local checkpoint bundles are committed under `artifacts/portfolio/`, approximately 4 MB total. Their configurations, preprocessing state and checksums are retained. The original model/training implementations were reused unchanged.
+- Training uses full engine-grouped 80/20 train/validation splits, seed 42, three neural epochs and 120-tree XGBoost caps. Exact settings are in [DECISIONS.md](../DECISIONS.md) and `configs/portfolio/`. These are reduced-budget demonstrator models, not the original three-seed published research runs. Some neural errors are substantially higher.
+- Metrics displayed in the arena belong to these exact checkpoints on the official test engines. They are single-seed results; no variance is claimed. Original published scores under results/FD001 and results/FD004 are preserved and not mixed with these weights. Per-engine test outputs are retained in `results/portfolio/`.
+- Replay uses twelve **validation** engines per subset, disjoint from the fitting engines. These engines were used for checkpoint selection, so replay residuals are not independent final test metrics. Actual RUL is known from their run-to-failure trajectories and capped at 125. Padded early windows use the same serving pipeline.
+- Importance bars show per-model **permutation increase in MAE (cycles)** across up to 512 validation windows and all 21 sensors, one seeded permutation. The six highest values are displayed; negative scores and dropped sensors are retained in JSON. These are predictive sensitivities, not causal explanations, calibrated uncertainty or SHAP values.
+- Static what-if controls use exact model evaluations for one sensor (S2/S4/S11) at a time, at −10/−5/0/+5/+10%, at every exported cycle, for all four models. Changing one slider resets the others. No interpolation, additive surrogate or fabricated result is used. Missing entries produce an error.
 
-The what-if demo is a simple deterministic sensitivity heuristic, not a causal model or inference result. Sensor bars show drift, not SHAP importance. No calibrated confidence is presented. Thresholds of 30/60 cycles are illustrative and must not guide safety decisions.
+**Still illustrative:** the 30/60-cycle health/alert policy and the turbofan schematic are explicitly labeled in the UI. These thresholds are not operational maintenance limits. No physical twin state, causal effect or calibrated confidence is invented.
 
-Regenerate illustrative data from the repository root (existing Python environment):
+## Reproduce data, training and exports
+
+From the repository root, using the existing Python environment:
 
 ```bash
-.venv/bin/python frontend/scripts/export_demo.py
+.venv/bin/python scripts/portfolio/download.py
+OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=2 \
+  MPLCONFIGDIR="$PWD/work/mpl" .venv/bin/python scripts/portfolio/train.py
+OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 \
+  .venv/bin/python frontend/scripts/export_demo.py
 ```
 
-Export real precomputed predictions from explicitly provided trained bundles:
+The downloader refuses mismatched existing files. The training runner reuses completed checkpoints only when their saved configuration matches; use a new versioned run directory for a changed protocol. All training/validation selection finishes before official test evaluation begins. It does not overwrite published research results. If bundles are already present, skip training and regenerate directly after verifying/download of raw files.
+
+The exporter writes `public/demo-FD001.json` through `demo-FD004.json` and `demo.json` (default FD004), plus matching `catalog*.json` fleet summaries. Copy both sets for embedding. It batches the original preprocessing/window/model operations, then independently checks baseline and perturbed output against FastAPI for all 16 checkpoints. Observed maximum error is below 0.00002 cycles. `model_bundle.py` is an export adapter, not a new model implementation. `--subset` exports one subset; `--engines` changes preview size (default 12).
+
+Only load trusted checkpoints: joblib and torch serialization can execute code. The committed artifact manifest in `results/portfolio/manifest.json` records SHA-256 for every required bundle file. Static inference does not execute those bundles in the browser.
+
+## Optional live what-if
 
 ```bash
-.venv/bin/python frontend/scripts/export_demo.py --subset FD004 \
-  --bundle xgboost=runs/FD004/xgboost/latest \
-  --bundle lstm=runs/FD004/lstm/latest \
-  --bundle gru=runs/FD004/gru/latest \
-  --bundle transformer=runs/FD004/transformer/latest
-```
-
-Run `--help` for output location and engine-count options. Only load trusted local bundles: joblib/PyTorch serialization can execute code. The exporter checks model metadata and calls the unchanged FastAPI prediction pipeline for each prefix. It requires XGBoost for fleet risk ranking; other missing model series remain unavailable, never fabricated. Dataset raw files must exist. Production weights are absent here; the trained-export code path was exercised separately with a synthetic test artifact, not a research-trained model. Real exported training trajectories are in-sample visualization, not a held-out evaluation. Do not compare their residuals with published held-out scores.
-
-`NEXT_PUBLIC_RUL_DATA_URL` overrides the static JSON URL (set before build). Schema is in `src/modules/rul/types.ts`. Build-time `NEXT_PUBLIC_DEMO_MODE=false` enables real what-if requests:
-
-```bash
-# Repository root, first terminal (provide your trusted trained bundle):
-RULPM_ARTIFACT_DIR=runs/FD004/xgboost/latest .venv/bin/python -m uvicorn rul_pm.api.app:create_app --factory --host 127.0.0.1 --port 8000
-# frontend/, second terminal:
+# Repository root:
+RULPM_ARTIFACT_DIR=artifacts/portfolio/FD004/xgboost/seed_42 \
+ .venv/bin/python -m uvicorn rul_pm.api.app:create_app --factory --host 127.0.0.1 --port 8000
+# frontend/, another terminal:
 NEXT_PUBLIC_DEMO_MODE=false API_BASE_URL=http://127.0.0.1:8000 npm run build
 npm start
 ```
 
-The Next rewrite forwards `/api/predict` to `/predict`. The live UI test was verified against a synthetic smoke bundle, including sensor payloads, success, backend error and retry. API_BASE_URL is server configuration, never a browser credential. The configured backend serves one model; the model name returned by the API is displayed. The flag changes what-if inference, not the provenance of static replay data. Model comparison remains from the static export. Do not send credentials in public environment variables. For public hosting, keep backend private behind a controlled server proxy and add request limits/authentication appropriate to your deployment.
+Next rewrites `/api/predict` to the unchanged FastAPI `/predict`. The response identifies the configured backend model. Live mode still serves one configured backend model; the importance selector does not change that server's bundle. Its results may differ from the selected replay model/subset. Use static mode to compare exact per-subset/model what-if outputs without a backend. No API response shape or model/training code changed for this update. The earlier API integer-input normalization remains in place.
 
-## Portfolio embedding
+## Embed in a portfolio
 
-Copy `src/modules/rul/` into your portfolio. Import `Observatory` from that folder in any App Router page, for example `app/projects/rul/page.tsx`. Install the frontend runtime dependencies, configure `@tailwindcss/postcss`, and copy demo.json into your public folder or set NEXT_PUBLIC_RUL_DATA_URL. The module uses relative internal imports. No `@/` alias is required inside it.
+Copy `src/modules/rul/` into your App Router project and import `Observatory` in a route page. Copy public/demo*.json and public/catalog*.json or configure the data URL template; install this module's runtime dependencies and `@tailwindcss/postcss`. Internal imports are relative; no `@/` alias is required inside the module. Keep the Next rewrite only if enabling live inference.
 
-All styles and tokens are scoped under the CSS module root, including the Radix dialog portal. Tailwind is referenced for local @apply; there is no preflight, body reset or global stylesheet. The example app layout's body margin is host-level scaffolding and should not be copied into a portfolio. Color/type/spacing/radius/motion tokens live in styles.module.css. Model palette has separate AA-friendly light colors. Data fetch is lazy; charts are dynamically imported. No global keyboard behavior fires while typing or using buttons; Cmd/Ctrl+K opens the focus-trapped palette. Space toggles replay and arrows step cycles on the engine workspace. Playback stops when leaving the view and at end of life.
+The CSS module scopes tokens, themes and component styles to its root, including the Radix dialog portal. Tailwind uses local @reference/@apply without a global reset or utility leakage. The example app's body margin is host scaffolding; do not copy that layout into an existing portfolio. Tokens live in styles.module.css. Motion respects reduced-motion preferences; Space toggles replay, arrow keys step cycles, Cmd/Ctrl+K opens the focus-trapped palette. The workspace is one route with in-page Zustand navigation; browser Back does not track its internal views.
 
 ```mermaid
 flowchart LR
-  Page[Portfolio App Router page] --> UI[Scoped RUL module]
+  Source[Pinned C-MAPSS mirror + SHA-256 manifest] --> Split[Engine-grouped train / validation]
+  Split --> Train[16 reduced-budget checkpoints]
+  Train --> Official[Official test evaluation]
+  Train --> Export[Real replay / permutation / what-if export]
+  Export --> JSON[Four static subset JSONs]
+  JSON --> UI[Scoped Next.js module]
+  Official --> JSON
   UI --> Store[Zustand cursor / replay / navigation]
-  UI --> JSON[Static trajectory export]
   UI --> Charts[Lazy Recharts + exact-value tables]
-  UI --> Proxy[Next same-origin rewrite]
-  Proxy --> API[Unchanged FastAPI /predict]
-  Bundle[Trusted local trained bundles] --> Export[Python exporter via FastAPI pipeline]
-  Raw[C-MAPSS raw trajectories] --> Export
-  Export --> JSON
-  Published[Published FD001 / FD004 metrics] --> Export
+  UI --> Proxy[Optional Next rewrite]
+  Proxy --> API[FastAPI configured real bundle]
 ```
 
-## QA
+## QA and outstanding work
 
-```bash
-npm run lint
-npm run typecheck
-npm run build
-npm start # keep running in another terminal
-npm test
-CHROME_PATH=/usr/bin/chromium npx lighthouse http://127.0.0.1:3000 \
-  --chrome-flags='--headless --no-sandbox' --only-categories=performance,accessibility
-```
+`npm run lint`, `npm run typecheck`, `npm run build`, `npm start`, then `npm test`. Playwright uses `/usr/bin/chromium`; override CHROME_PATH on other machines. For the optional live test, run a second API-enabled UI at port 3001 plus FastAPI, then `LIVE_UI_URL=http://127.0.0.1:3001 npm test` with production static UI on 3000. Without LIVE_UI_URL the live test is explicitly skipped. Python regression command: `.venv/bin/python -m pytest -ra` (limit CPU threads as above).
 
-The Playwright config uses the installed `/usr/bin/chromium`; override CHROME_PATH when needed. Install Chromium through your normal Playwright setup on other machines. Browser tests exercise real UI states, cursor/playback, model pages, missing data, what-if stale results, theme, dialog focus, retry, console errors and axe scans at 360/768/1440. Results and limits are in [QA.md](QA.md). Screenshots and Lighthouse reports are under qa/.
-
-## Outstanding project work
-
-Research-trained checkpoints, genuine per-engine held-out predictions, model attributions, a live fleet ingestion service, and operational threshold calibration remain absent. FD001–FD003 raw data are absent; FD002/FD003 lack acquisition/config/evaluations. Full retraining was not requested or run. [AUDIT.md](../AUDIT.md), [RESEARCH.md](../RESEARCH.md), and [DECISIONS.md](../DECISIONS.md) contain the evidence and choices. Python model/training code and API response shapes are unchanged. A minimal API ingestion fix converts sensor/settings columns to floats for JSON integer measurements; see DECISIONS.md and the added regression coverage.
+See [QA.md](QA.md) and qa/ for current results, screenshots and Lighthouse reports. A full-budget multi-seed experiment on FD002/FD003, attribution uncertainty estimates, operational policy calibration, real telemetry ingestion and a physical digital twin remain future research. The current importance is genuine permutation sensitivity, not SHAP or causality. No public deployment was performed.

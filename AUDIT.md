@@ -18,3 +18,7 @@ Add a route-embeddable frontend module and static illustrative replay, visibly d
 
 ## Discovered during implementation
 A real browser POST using whole-valued sensor/settings numbers exposed pandas 3 integer-column scaling failure. The API ingestion boundary now casts present measurement columns to float; response shapes and model/training code remain unchanged. Added integer-payload parity coverage (29 backend tests).
+
+## Real-model update — 2026-10-26
+
+FD001–FD004 raw data are now downloaded and checksum-verified against the pinned mirror. All 16 reduced-budget checkpoints, official test evaluations and artifact checksums are retained under artifacts/portfolio and results/portfolio. Real validation-engine replay, 21-sensor permutation importance and exact precomputed single-sensor perturbations replace the illustrative predictions and drift bars. Workspace dataset switching loads all four actual exports. Threshold policy and decorative schematic remain explicitly illustrative. The original baseline audit above describes the historical checkout, not the current readiness. Full-budget three-seed FD002/FD003 research, causal explanations, operational threshold calibration and production deployment remain outside this update.

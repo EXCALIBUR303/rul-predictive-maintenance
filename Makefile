@@ -1,6 +1,6 @@
 PYTHON ?= .venv/bin/python
 
-.PHONY: install install-all test data-fd001 data-fd004 eda-fd001 eda-fd004 train-xgboost-fd001 train-xgboost-fd004 experiment-fd001 experiment-fd004 serve
+.PHONY: install install-all test data-all data-fd001 data-fd002 data-fd003 data-fd004 eda-fd001 eda-fd004 train-xgboost-fd001 train-xgboost-fd004 experiment-fd001 experiment-fd004 serve
 
 install:
 	uv sync --python 3.11 --extra dev
@@ -11,11 +11,20 @@ install-all:
 test:
 	env -u OMP_NUM_THREADS $(PYTHON) -m pytest
 
+data-all:
+	$(PYTHON) scripts/portfolio/download.py
+
 data-fd001:
-	$(PYTHON) scripts/download_cmapss.py --subset FD001
+	$(PYTHON) scripts/portfolio/download.py --subset FD001
+
+data-fd002:
+	$(PYTHON) scripts/portfolio/download.py --subset FD002
+
+data-fd003:
+	$(PYTHON) scripts/portfolio/download.py --subset FD003
 
 data-fd004:
-	$(PYTHON) scripts/download_cmapss.py --subset FD004
+	$(PYTHON) scripts/portfolio/download.py --subset FD004
 
 eda-fd001:
 	$(PYTHON) -m rul_pm.cli eda --config configs/fd001.yaml
