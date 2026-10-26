@@ -15,3 +15,6 @@ FD004 raw files exist and passed hashes; FD001–FD003 raw data absent. Acquisit
 
 ## Implementation boundary
 Add a route-embeddable frontend module and static illustrative replay, visibly distinct from published metrics. Export real predictions only from explicitly supplied trained bundles. Keep unsupported datasets empty and explain missing evidence. Never fabricate evaluations, confidence intervals or feature attribution.
+
+## Discovered during implementation
+A real browser POST using whole-valued sensor/settings numbers exposed pandas 3 integer-column scaling failure. The API ingestion boundary now casts present measurement columns to float; response shapes and model/training code remain unchanged. Added integer-payload parity coverage (29 backend tests).

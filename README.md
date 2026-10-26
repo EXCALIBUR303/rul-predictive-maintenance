@@ -6,6 +6,14 @@ It compares XGBoost against LSTM, GRU, and a small Transformer under one
 engine-level experimental protocol, with the official test set held out until
 final evaluation.
 
+## Interactive product UI
+
+The new **RUL Observatory** lives in [frontend/](frontend/README.md): a self-contained Next.js experience with fleet risk ranking, cycle replay, model comparison and dataset exploration. Run `cd frontend && npm ci && npm run dev`. Default demo mode needs no backend. Replay predictions are explicitly illustrative; published benchmark metrics remain real.
+
+![RUL Observatory fleet overview](frontend/qa/fleet-1440.png)
+
+See [frontend setup and architecture](frontend/README.md), [audit](AUDIT.md), [research](RESEARCH.md), [decisions](DECISIONS.md), and [QA](frontend/QA.md).
+
 ## Published FD001 Result
 
 | Model | MAE | RMSE | NASA/PHM08 Score |

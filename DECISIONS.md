@@ -12,6 +12,7 @@
 | Scoped CSS, native font stack, inline vector engine graphic | Remote fonts/images or 3D model | Offline portfolio portability, no tracking or asset licensing ambiguity | Replace module tokens/assets |
 | Webpack production build | Turbopack default | Turbopack CSS worker encountered socket restrictions in this environment; webpack builds successfully | Change package build script to next build after validating worker permissions |
 | Tailwind local @reference/@apply only | Global preflight/utilities | Avoid CSS leakage when embedded; module owns its styles | Introduce scoped utilities after checking host pages |
+| Single embeddable App Router route; in-page views in Zustand | Nested standalone application routes | Makes the experience easy to mount inside a portfolio; browser back does not track internal views | Split views into nested routes and synchronize state with route parameters |
 
 API-only exception: `src/rul_pm/api/app.py` normalizes present sensor/operating-setting columns to float before preprocessing. A real UI POST with whole-valued JSON measurements failed under pandas 3 with an integer-column assignment error. Alternatives: change preprocessing/training, or distort payload values with artificial decimals (rejected). This boundary normalization preserves legitimate values and all response shapes; reverse by removing the conversion after a future preprocessor supports integer frames. The existing API parity test now covers both integer and floating measurement payloads.
 
