@@ -196,57 +196,76 @@ export default function Observatory() {
   const [activeSubset, setActiveSubset] = useState("FD004");
   const loadingRequest = useRef<AbortController | null>(null);
   const [active, setActive] = useState<Model[]>([...models]);
-  const load = useCallback(async () => {
-    loadingRequest.current?.abort();
-    const controller = new AbortController();
-    loadingRequest.current = controller;
-    setPlaying(false);
-    setLoading(true);
-    setLoadError("");
-    try {
-      const r = await fetch(
-        process.env.NEXT_PUBLIC_RUL_DATA_URL?.replace(
-          "{subset}",
-          activeSubset,
-        ) ||
-          (activeSubset === "FD004"
-            ? "/demo.json"
-            : `/demo-${activeSubset}.json`),
-        { signal: controller.signal },
-      );
-      if (!r.ok) throw Error(`Dataset request failed (${r.status})`);
-      const d = await r.json();
-      if (
-        d.schemaVersion !== 1 ||
-        !d.engines?.length ||
-        !d.models?.length ||
-        !d.engines.every((e: Engine) => e.points?.length)
-      )
-        throw Error("Unsupported or empty dataset export");
-      if (d.subset !== activeSubset)
-        throw Error("Dataset export does not match selected subset");
-      setData(d);
-      useRul.setState({
-        engine: d.engines[0].id,
-        cycle: d.engines[0].current,
-        playing: false,
-      });
-      setActive(d.models);
-      setSubset(d.subset);
-    } catch (e) {
-      if (controller.signal.aborted) return;
-      setLoadError(e instanceof Error ? e.message : "Dataset unavailable");
-    } finally {
-      if (!controller.signal.aborted) setLoading(false);
-    }
-  }, [activeSubset, setPlaying]);
+  const load = useCallback(
+    async (wantFull = false) => {
+      loadingRequest.current?.abort();
+      const controller = new AbortController();
+      loadingRequest.current = controller;
+      setPlaying(false);
+      setLoading(true);
+      setLoadError("");
+      try {
+        const r = await fetch(
+          process.env.NEXT_PUBLIC_RUL_DATA_URL?.replace(
+            "{subset}",
+            activeSubset,
+          ) ||
+            (activeSubset === "FD004"
+              ? wantFull
+                ? "/demo.json"
+                : "/catalog.json"
+              : `/${wantFull ? "demo" : "catalog"}-${activeSubset}.json`),
+          { signal: controller.signal },
+        );
+        if (!r.ok) throw Error(`Dataset request failed (${r.status})`);
+        const d = await r.json();
+        if (
+          d.schemaVersion !== 1 ||
+          !d.engines?.length ||
+          !d.models?.length ||
+          (!d.summary && !d.engines.every((e: Engine) => e.points?.length))
+        )
+          throw Error("Unsupported or empty dataset export");
+        if (d.subset !== activeSubset)
+          throw Error("Dataset export does not match selected subset");
+        setData(d);
+        const previous = useRul.getState();
+        const chosen =
+          (wantFull
+            ? d.engines.find((e: Engine) => e.id === previous.engine)
+            : null) ?? d.engines[0];
+        useRul.setState({
+          engine: chosen.id,
+          cycle: wantFull
+            ? Math.min(chosen.cycles, previous.cycle)
+            : chosen.current,
+          playing: false,
+        });
+        setActive(d.models);
+        setSubset(d.subset);
+      } catch (e) {
+        if (controller.signal.aborted) return;
+        setLoadError(e instanceof Error ? e.message : "Dataset unavailable");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    },
+    [activeSubset, setPlaying],
+  );
   useEffect(() => {
     const task = setTimeout(() => void load(), 0);
     return () => clearTimeout(task);
   }, [load]);
+  useEffect(() => {
+    if (loading || loadError || view === "Fleet overview" || !data?.summary)
+      return;
+    const task = setTimeout(() => void load(true), 0);
+    return () => clearTimeout(task);
+  }, [view, loading, loadError, data?.summary, load]);
   const selected =
     data?.engines.find((e) => e.id === engine) ?? data?.engines[0];
   const current =
+    selected?.snapshot ??
     selected?.points[
       Math.max(0, Math.min(cycle - 1, selected.points.length - 1))
     ];
@@ -284,6 +303,7 @@ export default function Observatory() {
         setPalette((v) => !v);
         return;
       }
+      if (data?.summary || loading) return;
       if (
         e.target instanceof HTMLElement &&
         e.target.closest("input,textarea,select,[role=dialog],button")
@@ -304,14 +324,14 @@ export default function Observatory() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [view, selected, setPlaying, setCycle]);
+  }, [view, selected, setPlaying, setCycle, data?.summary, loading]);
   const fleet = useMemo(
     () =>
       data?.engines
         .filter((e) => {
           const v =
-            e.points[e.current - 1]?.xgboost ??
-            e.points[e.current - 1]?.actual ??
+            (e.snapshot ?? e.points[e.current - 1])?.xgboost ??
+            (e.snapshot ?? e.points[e.current - 1])?.actual ??
             0;
           return (
             (filter === "all" || status(v) === filter) &&
@@ -321,17 +341,19 @@ export default function Observatory() {
         .sort((a, b) =>
           sort === "name"
             ? a.name.localeCompare(b.name)
-            : ((a.points[a.current - 1].xgboost ??
-                a.points[a.current - 1].actual) -
-                (b.points[b.current - 1].xgboost ??
-                  b.points[b.current - 1].actual)) *
+            : (((a.snapshot ?? a.points[a.current - 1]).xgboost ??
+                (a.snapshot ?? a.points[a.current - 1]).actual) -
+                ((b.snapshot ?? b.points[b.current - 1]).xgboost ??
+                  (b.snapshot ?? b.points[b.current - 1]).actual)) *
               (sort === "risk" ? 1 : -1),
         ) ?? [],
     [data, filter, query, sort],
   );
   const totals =
     data?.engines.map(
-      (e) => e.points[e.current - 1].xgboost ?? e.points[e.current - 1].actual,
+      (e) =>
+        (e.snapshot ?? e.points[e.current - 1]).xgboost ??
+        (e.snapshot ?? e.points[e.current - 1]).actual,
     ) ?? [];
   const points = selected?.points.slice(0, cycle) ?? [];
   const metrics = data?.metrics[subset] ?? [];
@@ -388,7 +410,7 @@ export default function Observatory() {
               <p style={{ marginTop: 5 }}>
                 NASA C-MAPSS research
                 <br />
-                FD001 + FD004 benchmarks
+                FD001–FD004 checkpoints
               </p>
               <div className={s.notice}>
                 Research demonstrator.
@@ -495,7 +517,8 @@ export default function Observatory() {
                     </Button>
                   </div>
                 </div>
-                {loading ? (
+                {loading ||
+                (data?.summary && view !== "Fleet overview" && !loadError) ? (
                   <div role="status" aria-label="Loading fleet">
                     <div className={s.stats}>
                       {[1, 2, 3, 4].map((i) => (
@@ -583,10 +606,10 @@ export default function Observatory() {
                               variant="ghost"
                               onClick={() => {
                                 select(data.engines[0].id, 1);
-                                setPlaying(true);
+                                setPlaying(!data.summary);
                               }}
                             >
-                              Start a life-cycle replay <ArrowRight size={14} />
+                              Open a life-cycle replay <ArrowRight size={14} />
                             </Button>
                           </div>
                           <EngineArt />
@@ -653,7 +676,7 @@ export default function Observatory() {
                         ) : (
                           <motion.div layout className={s.engineGrid}>
                             {fleet.map((e, i) => {
-                              const p = e.points[e.current - 1];
+                              const p = e.snapshot ?? e.points[e.current - 1];
                               const rul = p.xgboost ?? p.actual;
                               return (
                                 <motion.div
@@ -1021,7 +1044,8 @@ export default function Observatory() {
                               </thead>
                               <tbody>
                                 {data.engines.map((e) => {
-                                  const p = e.points[e.current - 1];
+                                  const p =
+                                    e.snapshot ?? e.points[e.current - 1];
                                   return (
                                     <tr key={e.id}>
                                       <th>{e.name}</th>

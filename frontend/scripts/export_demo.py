@@ -7,6 +7,7 @@ import numpy as np,pandas as pd,torch
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'src'))
 from rul_pm.data.io import read_cmapss_table
 from model_bundle import Bundle
+from catalog import write_catalog
 ROOT=Path(__file__).resolve().parents[2]
 MODELS=['xgboost','lstm','gru','transformer'];SENSORS=[2,3,4,7,9,11,12,14,15,20,21]
 def export(subset,engines,output):
@@ -57,10 +58,10 @@ def export(subset,engines,output):
   metrics[sub].sort(key=lambda r:r['rmse_mean']);sources[sub]='Reduced-budget checkpoints · seed 42 · one run/model (no variance estimate)'
  corr=raw[[f'sensor_{s}' for s in SENSORS]].corr().fillna(0).round(4).values.tolist()
  result={'schemaVersion':1,'subset':subset,'predictionSource':'real reduced-budget trained checkpoints · seed 42','trajectorySource':f'C-MAPSS {subset} held-out validation engines (not fitted; used for checkpoint selection)','models':MODELS,'sensors':SENSORS,'engines':records,'correlation':corr,'metrics':metrics,'metricSources':sources,'importance':importance,'importanceSource':'Permutation Δ MAE (cycles), one seeded permutation, up to 512 validation windows from preview engines; negative values are retained. Not causal attribution.','apiParityMaxAbsError':parity,'testResiduals':test_residuals,'checkpointPaths':{m:str(p.relative_to(ROOT)) for m,p in paths.items()},'datasetManifestSha256':hashlib.sha256((ROOT/'docs/data/cmapss-manifest.json').read_bytes()).hexdigest()}
- output.write_text(json.dumps(result,separators=(',',':'),allow_nan=False))
+ output.write_text(json.dumps(result,separators=(',',':'),allow_nan=False));write_catalog(output)
  print('WROTE',output,len(records),parity,flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--subset',choices=['FD001','FD002','FD003','FD004']);p.add_argument('--engines',type=int,default=12);a=p.parse_args();torch.set_num_threads(2)
  for subset in [a.subset] if a.subset else ['FD001','FD002','FD003','FD004']:
   export(subset,a.engines,ROOT/f'frontend/public/demo-{subset}.json')
- shutil.copy2(ROOT/'frontend/public/demo-FD004.json',ROOT/'frontend/public/demo.json')
+ shutil.copy2(ROOT/'frontend/public/demo-FD004.json',ROOT/'frontend/public/demo.json');write_catalog(ROOT/'frontend/public/demo.json')

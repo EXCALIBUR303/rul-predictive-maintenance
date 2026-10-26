@@ -22,6 +22,11 @@ def test_source_manifest_covers_all_twelve_files():
 def test_real_export_has_no_fitted_engines_or_synthetic_predictions(subset):
  d=json.loads((ROOT/f'frontend/public/demo-{subset}.json').read_text())
  assert 'real' in d['predictionSource'] and len(d['engines'])==12
+ catalog=json.loads((ROOT/f'frontend/public/catalog-{subset}.json').read_text())
+ assert catalog['summary'] is True
+ for small,full in zip(catalog['engines'],d['engines']):
+  assert small['points']==[] and small['id']==full['id']
+  for model in MODELS:assert small['snapshot'][model]==full['points'][full['current']-1][model]
  for model in MODELS:
   metadata=json.loads((ROOT/d['checkpointPaths'][model]/'metadata.json').read_text())
   assert {e['id'] for e in d['engines']}<=set(metadata['val_units'])

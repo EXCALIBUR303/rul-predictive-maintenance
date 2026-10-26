@@ -111,7 +111,12 @@ export default function Charts({
               </linearGradient>
             </defs>
             <CartesianGrid stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="cycle" {...axis} />
+            <XAxis
+              dataKey="cycle"
+              {...axis}
+              minTickGap={24}
+              interval="preserveStartEnd"
+            />
             <YAxis domain={["auto", "auto"]} {...axis} width={48} />
             <Tooltip {...tooltip} />
             <Area
@@ -125,7 +130,12 @@ export default function Charts({
         ) : (
           <LineChart data={kind === "residual" ? residuals : sampled}>
             <CartesianGrid stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="cycle" {...axis} />
+            <XAxis
+              dataKey="cycle"
+              {...axis}
+              minTickGap={24}
+              interval="preserveStartEnd"
+            />
             <YAxis
               {...axis}
               width={36}

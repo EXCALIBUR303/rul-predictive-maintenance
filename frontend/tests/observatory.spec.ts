@@ -61,6 +61,7 @@ for (const width of [360, 768, 1440]) {
     expect(
       Number(await page.getByRole("slider", { name: /Cycle / }).inputValue()),
     ).toBeGreaterThan(150);
+    await page.waitForTimeout(500);
     await page.screenshot({ path: `qa/engine-${width}.png`, fullPage: true });
     expect(
       (
@@ -130,7 +131,7 @@ for (const width of [360, 768, 1440]) {
 }
 test("dataset failure, retry and loading", async ({ page }) => {
   let fail = true;
-  await page.route("**/demo.json", async (route) => {
+  await page.route("**/catalog.json", async (route) => {
     if (fail) await route.fulfill({ status: 503, body: "unavailable" });
     else await route.continue();
   });

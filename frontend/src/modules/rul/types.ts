@@ -13,6 +13,7 @@ export type Engine = {
   cycles: number;
   current: number;
   points: Point[];
+  snapshot?: Point;
 };
 export type Metric = {
   model: Model;
@@ -23,6 +24,7 @@ export type Metric = {
 };
 export type Dataset = {
   schemaVersion: number;
+  summary?: boolean;
   subset: string;
   predictionSource: string;
   trajectorySource: string;
